@@ -113,8 +113,13 @@ public int getWeight() {
  * @return 
  *       | result == maxWeight > weight >= (strength+agility)/2 
 */
+<<<<<<< HEAD
 public boolean isValidWeight(int weight) {
 	return (weight >=(this.getStrength() +this.getStrength())/2 && weight <= maxWeight);
+=======
+public boolean isValidWeight(int unitWeight) {
+	return (unitWeight >=(this.getStrength() +this.getAgility())/2);
+>>>>>>> origin/master
 }
 
 /**
