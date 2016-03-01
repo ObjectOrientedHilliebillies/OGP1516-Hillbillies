@@ -114,7 +114,7 @@ public int getWeight() {
  *       | result == unitWeight >= (unitStrength+unitAgility)/2
 */
 public boolean isValidWeight(int unitWeight) {
-	return (unitWeight >=(this.getStrength() +this.getStrength())/2);
+	return (unitWeight >=(this.getStrength() +this.getAgility())/2);
 }
 
 /**
