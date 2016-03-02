@@ -9,7 +9,6 @@ package hillbillies.model;
 //			  interaction with game world (defensive)
 
 import be.kuleuven.cs.som.annotate.Basic;
-import be.kuleuven.cs.som.annotate.Immutable;
 import be.kuleuven.cs.som.annotate.Raw;;
 
 /**
@@ -98,6 +97,12 @@ public Unit(int weight, int strength, int agility, int toughness, String Name)
 	if (! isValidStrength(strength))
 		strength = 25;
 	setStrength(weight);
+	if (! isValidAgility(agility))
+		agility = 25;
+	setAgility(agility);
+	if (! isValidToughness(toughness))
+		toughness = 25;
+	setToughness(toughness);
 	
 	this.setName(Name);
 }
@@ -119,9 +124,15 @@ public int getWeight() {
  * @return 
  *       | result == maxWeight > weight >= (strength+agility)/2 
 */
+<<<<<<< HEAD
 public boolean isValidWeight(int weight) {
 	return (weight >=(this.getStrength() + this.getAgility())/2 
 			&& weight <= maxWeight);
+=======
+
+public boolean isValidWeight(int weight) {
+	return (weight >=(this.getStrength() +this.getAgility())/2 && weight <= maxWeight);
+>>>>>>> origin/master
 }
 
 /**
@@ -306,8 +317,13 @@ public String getName() {
 				&& name.matches("[a-zA-Z ']")
 */
 public static boolean isValidName(String unitName) {
+	System.out.println("val = " + unitName);
 	return Character.isUpperCase(unitName.charAt(0)) && unitName.length() >= 2 
 			&& unitName.matches("[a-zA-Z ']+");
+<<<<<<< HEAD
+=======
+	
+>>>>>>> origin/master
 }
 
 /**
