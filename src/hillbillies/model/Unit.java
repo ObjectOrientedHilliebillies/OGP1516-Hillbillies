@@ -3,6 +3,8 @@ package hillbillies.model;
 
 
 
+import java.util.Random;
+
 // unit has a position, occupied block (defensive), 
 //			  name (defensive), 
 //			  weight, strength, agility, toughness (total)
@@ -494,7 +496,6 @@ public void setTime(double time) {
 private double currentTime;
 private double maxTimeLapse;
 
-<<<<<<< HEAD
 public void work() {
 	double currentTime = this.getCurrentTime();
 	double workPeriod = 500/this.getStrength();
@@ -507,21 +508,31 @@ public void work() {
 
 public void attack(Unit unit) {
 	if ((this.getOccupiedBlock() == unit.getOccupiedBlock) 
-			|| (this.getOccupiedBlock().isNextTo(unit.getOccupiedBlock))); 
+			|| (Vector.getCube().isNeighbourBlock(unit.getOccupiedBlock)))
+		unit.defenseAgainst(this);
 }
 
 public boolean isUnderAttack() {
-	
 }
 
-public void defense() {
-	
+public void defenseAgainst(Unit unit) {	
+	// First step: try to dodge
+	double dodgeChance = 0.2*unit.getAgility()/this.getAgility();
+	double blockChance = 0.25*(unit.getStrength() + unit.getAgility())/
+			(this.getAgility() + this.getStrength());
+	if (Math.random() <= dodgeChance)
+		double xCoord = Vector.getXCoord(); // iets vinden om dat random te maken
+	else if (Math.random() <= blockChance)
+		// er gebeurt niets
+		this.defenseAgainst(unit);
+	else
+		this.setHitpoints(this.getHitpoints() - unit.getStrength()/10);
+	// tijd moet 1 seconde verspringen
+		
+		
 }
-
 
 // 	NOG NIET MET TEMPLATES
-=======
->>>>>>> refs/remotes/origin/master
 
 // TODO Dit op de juiste plek zetten
 /** TO BE ADDED TO CLASS HEADING
