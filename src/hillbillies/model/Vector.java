@@ -3,6 +3,7 @@ package hillbillies.model;
 import java.util.ArrayList;
 
 public class Vector {
+	private final int cubesPerRib = 50;
 	private double compX;
 	private double compY;
 	private double compZ;
@@ -32,6 +33,12 @@ public class Vector {
 		return new Cube(this);
 	}
 	
+	public boolean inBorders(){
+		return (this.getXCoord() <= this.cubesPerRib && this.getXCoord() >= 0 &&
+				this.getYCoord() <= this.cubesPerRib && this.getYCoord() >= 0 &&
+				this.getZCoord() <= this.cubesPerRib && this.getZCoord() >= 0);
+	}
+	
 	public void setXcoord(double coordX) {
 		this.compX = coordX;
 	}
@@ -51,5 +58,4 @@ public class Vector {
 	public double getZCoord() {
 		return this.compZ;
 	}
-	
 }

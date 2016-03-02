@@ -1,7 +1,7 @@
 package hillbillies.model;
 
 
-import java.util.ArrayList;
+
 
 // unit has a position, occupied block (defensive), 
 //			  name (defensive), 
@@ -536,7 +536,8 @@ public Vector getPosition() {
  *       // TODO Deze check aanvullen.
 */
 public static boolean isValidPosition(Vector position) {
-	return false;
+	return position.inBorders();
+	// TODO Een test maken om dit uit te testen
 }
 
 /**

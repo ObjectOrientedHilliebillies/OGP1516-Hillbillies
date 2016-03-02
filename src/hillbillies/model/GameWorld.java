@@ -1,18 +1,15 @@
 package hillbillies.model;
 
-import java.net.PasswordAuthentication;
-
 public class GameWorld {
-	private final static int cubesPerRib = 50;
-	private final static int cubeLenght = 1;
-	
+	private final int cubesPerRib = 50;
 	
 	public GameWorld(){
 		
 	}
 	
-	
-	
-	
-	
+	public boolean inBorders(Vector vector){
+		return (vector.getXCoord() <= this.cubesPerRib && vector.getXCoord() >= 0 &&
+				vector.getYCoord() <= this.cubesPerRib && vector.getYCoord() >= 0 &&
+				vector.getZCoord() <= this.cubesPerRib && vector.getZCoord() >= 0);
+	}
 }
