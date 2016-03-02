@@ -3,9 +3,9 @@ package hillbillies.model;
 import java.util.ArrayList;
 
 public class Vector {
-	private double coordX;
-	private double coordZ;
-	private double coordY;
+	private double compX;
+	private double compY;
+	private double compZ;
 
 	public Vector(double coordX, double coordY, double coordZ){
 		setXcoord(coordX);
@@ -27,24 +27,29 @@ public class Vector {
 		return vectorArray;
 	}
 	
+	// TODO Ik weet niet of dit helemaal mag.
+	public Cube getCube(){
+		return new Cube(this);
+	}
+	
 	public void setXcoord(double coordX) {
-		this.coordX = coordX;
+		this.compX = coordX;
 	}
 	public void setYcoord(double coordY) {
-		this.coordY = coordY;
+		this.compY = coordY;
 	}
 	public void setZcoord(double coordZ) {
-		this.coordZ = coordZ;
+		this.compZ = coordZ;
 	}
 	
 	public double getXCoord() {
-		return this.getXCoord();
+		return this.compX;
 	}
 	public double getYCoord() {
-		return this.getYCoord();
+		return this.compY;
 	}
 	public double getZCoord() {
-		return this.getZCoord();
+		return this.compZ;
 	}
 	
 }
