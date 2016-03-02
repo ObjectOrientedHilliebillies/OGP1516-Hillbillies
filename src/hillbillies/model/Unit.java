@@ -470,6 +470,29 @@ public void setHitpoints(int hitpoints) {
 private int hitpoints;
 private int maxHitpoints = this.getWeight()*this.getToughness()/50;
 
+
+public void advanceTime(double timeLapse) throws IllegalArgumentException {
+	if (!isValidTimeLapse(timeLapse))
+		throw new IllegalArgumentException();
+	else
+		this.setTime(this.currentTime + timeLapse);
+}
+
+public boolean isValidTimeLapse(double timeLapse) {
+	return ((0 < timeLapse) && (timeLapse < maxTimeLapse));
+}
+
+public double getCurrentTime() {
+	return this.currentTime;
+}
+
+public void setTime(double time) {
+	this.currentTime = time;
+}
+
+private double currentTime;
+private double maxTimeLapse;
+
 // 	NOG NIET MET TEMPLATES
 
 
@@ -490,17 +513,6 @@ private int maxHitpoints = this.getWeight()*this.getToughness()/50;
 //public int[] getOccupiedBlock() {
 //	return this.occupiedBlock;
 //}
-
-private double currentTime;
-private final double increment = 0.2;
-
-public void advanceTime(double currentTime) {
-	this.currentTime = currentTime + this.increment;
-}
-
-public double getTime() {
-	return this.currentTime;
-}
 
 
 
