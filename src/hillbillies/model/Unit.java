@@ -349,13 +349,6 @@ public static boolean isValidName(String unitName) {
 	System.out.println("val = " + unitName);
 	return Character.isUpperCase(unitName.charAt(0)) && unitName.length() >= 2 
 			&& unitName.matches("[a-zA-Z ']+");
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-	
->>>>>>> origin/master
-=======
->>>>>>> refs/remotes/origin/Jonas
 }
 
 /**
