@@ -121,21 +121,21 @@ public class Unit {
 public Unit(int weight, int strength, int agility, int toughness, String Name, 
 		int stamina, int hitpoints)
 		throws IllegalArgumentException {
-	if (! isValidWeight(weight))
-		weight = (strength+agility)/2;
-	else
+//	if (! isValidWeight(weight))
+//		weight = (strength+agility)/2;
+//	else
 		setWeight(weight);
-	if (! isValidStrength(strength))
-		strength = 25;
-	else
+//	if (! isValidStrength(strength))
+//		strength = 25;
+//	else
 		setStrength(weight);
-	if (! isValidAgility(agility))
-		agility = 25;
-	else
+//	if (! isValidAgility(agility))
+//		agility = 25;
+//	else
 		setAgility(agility);
-	if (! isValidToughness(toughness))
-		toughness = 25;
-	else
+//	if (! isValidToughness(toughness))
+//		toughness = 25;
+//	else
 		setToughness(toughness);
 	
 	this.setName(Name);
