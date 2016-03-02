@@ -8,7 +8,12 @@ package hillbillies.model;
 //			  orientation (total)
 //			  interaction with game world (defensive)
 
+// COMMENTS
+//		Ik denk dat we omslachtig zijn geweest door altijd setVariable te gebruiken
+//		in plaats van gewoon this.variable = variable. 
+
 import be.kuleuven.cs.som.annotate.Basic;
+import be.kuleuven.cs.som.annotate.Immutable;
 import be.kuleuven.cs.som.annotate.Raw;;
 
 /**
@@ -31,6 +36,10 @@ import be.kuleuven.cs.som.annotate.Raw;;
  * @invar  The stamina of each unit must be a valid stamina for any
  *         unit.
  *       | isValidStamina(getStamina())
+ *  
+ * @invar  The hitpoints of each Unit must be a valid hitpoints for any
+ *         Unit.
+ *       | isValidHitpoints(getHitpoints())
  *       
  * @version 1.0
  * @author  Jonas Vantrappen & Victor Van Eetvelt
@@ -87,24 +96,51 @@ public class Unit {
  *       | if (isValidToughness(toughness))
  *       |   then new.getToughness() == toughness
  *       |   else new.getToughness() == 25
+ *       
+ * Initialize this new unit with given stamina.
+ * 
+ * @param  stamina
+ *         The stamina for this new unit.
+ * @pre    The given stamina must be a valid stamina for any unit.
+ *       | isValidStamina(stamina)
+ * @post   The stamina of this new unit is equal to the given
+ *         stamina.
+ *       | new.getStamina() == stamina
+ *       
+ * 
+ * Initialize this new Unit with given hitpoints.
+ * 
+ * @param  hitpoints
+ *         The hitpoints for this new Unit.
+ * @pre    The given hitpoints must be a valid hitpoints for any Unit.
+ *       | isValidHitpoints(hitpoints)
+ * @post   The hitpoints of this new Unit is equal to the given
+ *         hitpoints.
+ *       | new.getHitpoints() == hitpoints
  */
-
-public Unit(int weight, int strength, int agility, int toughness, String Name)
+public Unit(int weight, int strength, int agility, int toughness, String Name, 
+		int stamina, int hitpoints)
 		throws IllegalArgumentException {
-	if (! isValidWeight(weight))
-		weight = (strength+agility)/2;
-	setWeight(weight);
-	if (! isValidStrength(strength))
-		strength = 25;
-	setStrength(weight);
-	if (! isValidAgility(agility))
-		agility = 25;
-	setAgility(agility);
-	if (! isValidToughness(toughness))
-		toughness = 25;
-	setToughness(toughness);
+//	if (! isValidWeight(weight))
+//		weight = (strength+agility)/2;
+//	else
+		setWeight(weight);
+//	if (! isValidStrength(strength))
+//		strength = 25;
+//	else
+		setStrength(weight);
+//	if (! isValidAgility(agility))
+//		agility = 25;
+//	else
+		setAgility(agility);
+//	if (! isValidToughness(toughness))
+//		toughness = 25;
+//	else
+		setToughness(toughness);
 	
 	this.setName(Name);
+	this.setStamina(stamina);
+	this.setHitpoints(hitpoints);
 }
 
 /**
@@ -194,7 +230,6 @@ public void setStrength(int strength) {
 	if (isValidStrength(strength))
 		this.strength = strength;
 }
-
 
 
 /**
@@ -315,9 +350,12 @@ public static boolean isValidName(String unitName) {
 	return Character.isUpperCase(unitName.charAt(0)) && unitName.length() >= 2 
 			&& unitName.matches("[a-zA-Z ']+");
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 	
 >>>>>>> origin/master
+=======
+>>>>>>> refs/remotes/origin/Jonas
 }
 
 /**
@@ -347,25 +385,6 @@ public void setName(String unitName)
 private String unitName;
 
 
-
-/**
-
- */
-
-/**
- * Initialize this new unit with given stamina.
- * 
- * @param  stamina
- *         The stamina for this new unit.
- * @pre    The given stamina must be a valid stamina for any unit.
- *       | isValidStamina(stamina)
- * @post   The stamina of this new unit is equal to the given
- *         stamina.
- *       | new.getStamina() == stamina
- */
-public Unit(int stamina) {
-	this.setStamina(stamina);
-}
 
 /**
  * Return the stamina of this unit.
@@ -412,6 +431,51 @@ public void setStamina(int stamina) {
 private int stamina;
 private int maxStamina = this.getWeight()*this.getToughness()/50;
 
+/**
+ * Return the hitpoints of this Unit.
+ */
+@Basic @Raw
+public int getHitpoints() {
+	return this.hitpoints;
+}
+
+/**
+ * Check whether the given hitpoints is a valid hitpoints for
+ * any Unit.
+ *  
+ * @param  hitpoints
+ *         The hitpoints to check.
+ * @return 
+ *       | result == 0 < hitpoints <= maxHitpoints
+*/
+public boolean isValidHitpoints(int hitpoints) {
+	return ((0 < hitpoints) && (hitpoints <= maxHitpoints));
+}
+
+/**
+ * Set the hitpoints of this Unit to the given hitpoints.
+ * 
+ * @param  hitpoints
+ *         The new hitpoints for this Unit.
+ * @pre    The given hitpoints must be a valid hitpoints for any
+ *         Unit.
+ *       | isValidHitpoints(hitpoints)
+ * @post   The hitpoints of this Unit is equal to the given
+ *         hitpoints.
+ *       | new.getHitpoints() == hitpoints
+ */
+@Raw
+public void setHitpoints(int hitpoints) {
+	assert isValidHitpoints(hitpoints);
+	this.hitpoints = hitpoints;
+}
+
+/**
+ * Variable registering the hitpoints of this Unit.
+ */
+private int hitpoints;
+private int maxHitpoints = this.getWeight()*this.getToughness()/50;
+
 // 	NOG NIET MET TEMPLATES
 
 
@@ -442,19 +506,6 @@ public void advanceTime(double currentTime) {
 
 public double getTime() {
 	return this.currentTime;
-}
-
-
-public int hitpoints;
-
-public int getMaxHitpoints() {
-	return 200*getWeight()/100*getToughness()/100;
-}
-
-
-public int getHitpoints() {
-	assert this.hitpoints <= this.getMaxHitpoints();
-	return this.hitpoints;
 }
 
 
