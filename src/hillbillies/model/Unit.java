@@ -16,9 +16,11 @@ import be.kuleuven.cs.som.annotate.Raw;;
  * @invar  The weight of each unit must be a valid weight for any
  *         unit.
  *       | isValidWeight(getWeight())
+ *       
  * @invar  The strength of each unit must be a valid strength for any
  *         unit.
  *       | isValidStrength(getStrength())
+ *       
  * @invar  The agility of each unit must be a valid agility for any
  *         unit.
  *       | isValidAgility(getAgility())
@@ -26,6 +28,10 @@ import be.kuleuven.cs.som.annotate.Raw;;
  * @invar  The toughness of each unit must be a valid toughness for any
  *         unit.
  *       | isValidToughness(getToughness())
+ *       
+ * @invar  The stamina of each unit must be a valid stamina for any
+ *         unit.
+ *       | isValidStamina(getStamina())
  *       
  * @version 1.0
  * @author  Jonas Vantrappen & Victor Van Eetvelt
@@ -114,7 +120,7 @@ public int getWeight() {
  *       | result == maxWeight > weight >= (strength+agility)/2 
 */
 public boolean isValidWeight(int weight) {
-	return (weight >=(this.getStrength() +this.getStrength())/2 && weight <= maxWeight);
+	return (weight >=(this.getStrength() + this.getAgility())/2 && weight <= maxWeight);
 }
 
 /**
@@ -160,7 +166,7 @@ public int getStrength() {
  * @param  strength
  *         The strength to check.
  * @return 
- *       | result == 0 < unitStrength <= 200
+ *       | result == 0 < unitStrength <= maxStrength
 */
 public static boolean isValidStrength(int strength) {
 	return (0 < strength && strength <= maxStrength);
@@ -250,7 +256,7 @@ public int getToughness() {
  * @param  toughness
  *         The toughness to check.
  * @return 
- *       | result == 0 < toughness <= 200
+ *       | result == 0 < toughness <= maxToughness
 */
 public static boolean isValidToughness(int toughness) {
 	return (0 < toughness && toughness <= maxToughness);
@@ -300,7 +306,7 @@ public String getName() {
 */
 public static boolean isValidName(String unitName) {
 	return Character.isUpperCase(unitName.charAt(0)) && unitName.length() >= 2 
-			&& unitName.matches("[a-zA-Z]+");
+			&& unitName.matches("[a-zA-Z ']+");
 }
 
 /**
@@ -330,6 +336,70 @@ public void setName(String unitName)
 private String unitName;
 
 
+
+/**
+
+ */
+
+/**
+ * Initialize this new unit with given stamina.
+ * 
+ * @param  stamina
+ *         The stamina for this new unit.
+ * @pre    The given stamina must be a valid stamina for any unit.
+ *       | isValidStamina(stamina)
+ * @post   The stamina of this new unit is equal to the given
+ *         stamina.
+ *       | new.getStamina() == stamina
+ */
+public Unit(int stamina) {
+	this.setStamina(stamina);
+}
+
+/**
+ * Return the stamina of this unit.
+ */
+@Basic @Raw
+public int getStamina() {
+	return this.stamina;
+}
+
+/**
+ * Check whether the given stamina is a valid stamina for
+ * any unit.
+ *  
+ * @param  stamina
+ *         The stamina to check.
+ * @return 
+ *       | result == 0 < stamina < maxStamina
+*/
+public boolean isValidStamina(int stamina) {
+	return (0 < stamina && stamina < maxStamina);
+}
+
+/**
+ * Set the stamina of this unit to the given stamina.
+ * 
+ * @param  stamina
+ *         The new stamina for this unit.
+ * @pre    The given stamina must be a valid stamina for any
+ *         unit.
+ *       | isValidStamina(stamina)
+ * @post   The stamina of this unit is equal to the given
+ *         stamina.
+ *       | new.getStamina() == stamina
+ */
+@Raw
+public void setStamina(int stamina) {
+	assert isValidStamina(stamina);
+	this.stamina = stamina;
+}
+
+/**
+ * Variable registering the stamina of this unit.
+ */
+private int stamina;
+private int maxStamina = this.getWeight()*this.getToughness()/50;
 
 // 	NOG NIET MET TEMPLATES
 
@@ -364,26 +434,19 @@ public double getTime() {
 }
 
 
-public int stamina;
 public int hitpoints;
 
 public int getMaxHitpoints() {
 	return 200*getWeight()/100*getToughness()/100;
 }
 
-public int getMaxStamina() {
-	return 200*getWeight()/100*getToughness()/100;
-}
 
 public int getHitpoints() {
 	assert this.hitpoints <= this.getMaxHitpoints();
 	return this.hitpoints;
 }
 
-public int getStamina() {	
-	assert this.stamina <= this.getMaxStamina();
-	return this.stamina;
-}
+
 
 
 
