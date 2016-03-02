@@ -160,7 +160,6 @@ public int getWeight() {
  * @return 
  *       | result == maxWeight > weight >= (strength+agility)/2 
 */
-
 public boolean isValidWeight(int weight) {
 	return (weight >=(this.getStrength() + this.getAgility())/2 
 			&& weight <= maxWeight);
