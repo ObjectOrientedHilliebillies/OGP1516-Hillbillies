@@ -160,6 +160,7 @@ public int getWeight() {
  * @return 
  *       | result == maxWeight > weight >= (strength+agility)/2 
 */
+
 public boolean isValidWeight(int weight) {
 	return (weight >=(this.getStrength() + this.getAgility())/2 
 			&& weight <= maxWeight);
@@ -491,6 +492,30 @@ public void setTime(double time) {
 
 private double currentTime;
 private double maxTimeLapse;
+
+public void work() {
+	double currentTime = this.getCurrentTime();
+	double workPeriod = 500/this.getStrength();
+	double endTime = currentTime + workPeriod;
+	for(this.getCurrentTime(); this.getCurrentTime()<=endTime 
+			&& (!this.isUnderAttack()) // en niet moet rusten en geen andere taak
+			; this.advanceTime(0.2)) {
+	}
+}
+
+public void attack(Unit unit) {
+	if ((this.getOccupiedBlock() == unit.getOccupiedBlock) 
+			|| (this.getOccupiedBlock().isNextTo(unit.getOccupiedBlock))); 
+}
+
+public boolean isUnderAttack() {
+	
+}
+
+public void defense() {
+	
+}
+
 
 // 	NOG NIET MET TEMPLATES
 
