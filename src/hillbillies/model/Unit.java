@@ -1,6 +1,8 @@
 package hillbillies.model;
 
 
+
+
 // unit has a position, occupied block (defensive), 
 //			  name (defensive), 
 //			  weight, strength, agility, toughness (total)
@@ -9,8 +11,7 @@ package hillbillies.model;
 //			  interaction with game world (defensive)
 
 // COMMENTS
-//		Ik denk dat we omslachtig zijn geweest door altijd setVariable te gebruiken
-//		in plaats van gewoon this.variable = variable. 
+// 	TODO Ik denk dat we omslachtig zijn geweest door altijd setVariable te gebruiken in plaats van gewoon this.variable = variable. 
 
 import be.kuleuven.cs.som.annotate.Basic;
 import be.kuleuven.cs.som.annotate.Immutable;
@@ -493,6 +494,7 @@ public void setTime(double time) {
 private double currentTime;
 private double maxTimeLapse;
 
+<<<<<<< HEAD
 public void work() {
 	double currentTime = this.getCurrentTime();
 	double workPeriod = 500/this.getStrength();
@@ -518,30 +520,154 @@ public void defense() {
 
 
 // 	NOG NIET MET TEMPLATES
+=======
+>>>>>>> refs/remotes/origin/master
+
+// TODO Dit op de juiste plek zetten
+/** TO BE ADDED TO CLASS HEADING
+ * @invar  The position of each unit must be a valid position for any
+ *         unit.
+ *       | isValidPosition(getPosition())
+ */
 
 
-///**
-// * 
-// * @return unit's position
-// */
-//@Basic @Immutable
-//public double[] getPosition() {
-//	return this.position;
-//}
-//
-///**
-// * 
-// * @return block occupied by unit
-// */
-//@Basic @Immutable
-//public int[] getOccupiedBlock() {
-//	return this.occupiedBlock;
-//}
+/**
+ * Initialize this new unit with given position.
+ *
+ * @param  position
+ *         The position for this new unit.
+ * @effect The position of this new unit is set to
+ *         the given position.
+ *       | this.setPosition(position)
+ */
+public Unit(Vector position)
+		throws IllegalPositionException {
+	this.setPosition(position);
+}
 
 
+/**
+ * Return the position of this unit.
+ */
+@Basic @Raw
+public Vector getPosition() {
+	return this.position;
+}
+
+/**
+ * Check whether the given position is a valid position for
+ * any unit.
+ *  
+ * @param  position
+ *         The position to check.
+ * @return 
+ *       | result == 
+ *       // TODO Deze check aanvullen.
+*/
+public static boolean isValidPosition(Vector position) {
+	return position.inBorders();
+	// TODO Een test maken om dit uit te testen
+}
+
+/**
+ * Set the position of this unit to the given position.
+ * 
+ * @param  position
+ *         The new position for this unit.
+ * @post   The position of this new unit is equal to
+ *         the given position.
+ *       | new.getPosition() == position
+ * @throws IllegalPositionException
+ *         The given position is not a valid position for any
+ *         unit.
+ *       | ! isValidPosition(getPosition())
+ */
+@Raw
+public void setPosition(Vector position) 
+		throws IllegalPositionException {
+	if (! isValidPosition(position))
+		throw new IllegalPositionException();
+	this.position = position;
+}
+
+/**
+ * Variable registering the position of this unit.
+ */
+private Vector position;
 
 
+// TODO Dit moet weer vanboven komen.
+/**
+ * @invar  The orientation of each unit must be a valid orientation for any
+ *         unit.
+ *       | isValidOrientation(getOrientation())
+ */
 
+/**
+ * Initialize this new unit with given orientation.
+ * 
+ * @param  orientation
+ *         The orientation for this new unit.
+ * @post   If the given orientation is a valid orientation for any unit,
+ *         the orientation of this new unit is equal to the given
+ *         orientation. Otherwise, the orientation of this new unit is equal
+ *         to PI/2.
+ *       | if (isValidOrientation(orientation))
+ *       |   then new.getOrientation() == orientation
+ *       |   else new.getOrientation() == PI/2
+ */
+public Unit(float orientation) {
+	if (! isValidOrientation(orientation))
+		orientation = (float) (Math.PI/2);
+	setOrientation(orientation);
+}
+
+/**
+ * Return the orientation of this unit.
+ */
+@Basic @Raw
+public Float getOrientation() {
+	return this.orientation;
+}
+
+/**
+ * Check whether the given orientation is a valid orientation for
+ * any unit.
+ *  
+ * @param  orientation
+ *         The orientation to check.
+ * @return 
+ *       | result == 
+ *       // TODO Ik weet weer niet wat hier moet.
+*/
+public static boolean isValidOrientation(Float orientation) {
+	return false;
+}
+
+/**
+ * Set the orientation of this unit to the given orientation.
+ * 
+ * @param  orientation
+ *         The new orientation for this unit.
+ * @post   If the given orientation is a valid orientation for any unit,
+ *         the orientation of this new unit is equal to the given
+ *         orientation.
+ *       | if (isValidOrientation(orientation))
+ *       |   then new.getOrientation() == orientation
+ */
+@Raw
+public void setOrientation(float orientation) {
+	if (isValidOrientation(orientation))
+		this.orientation = orientation;
+}
+
+/**
+ * Variable registering the orientation of this unit.
+ */
+private float orientation;
+
+
+// 	NOG NIET MET TEMPLATES
 
 //public void rest() {
 //	if (this.hitpoints != this.getMaxHitpoints() && (!this.isUnderAttack()) )
