@@ -124,19 +124,19 @@ public Unit(int weight, int strength, int agility, int toughness, String Name,
 //	if (! isValidWeight(weight))
 //		weight = (strength+agility)/2;
 //	else
-		setWeight(weight);
+		this.setWeight(weight);
 //	if (! isValidStrength(strength))
 //		strength = 25;
 //	else
-		setStrength(weight);
+		this.setStrength(weight);
 //	if (! isValidAgility(agility))
 //		agility = 25;
 //	else
-		setAgility(agility);
+		this.setAgility(agility);
 //	if (! isValidToughness(toughness))
 //		toughness = 25;
 //	else
-		setToughness(toughness);
+		this.setToughness(toughness);
 	
 	this.setName(Name);
 	this.setStamina(stamina);
