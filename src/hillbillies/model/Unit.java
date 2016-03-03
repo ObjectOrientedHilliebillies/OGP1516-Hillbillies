@@ -506,9 +506,8 @@ private double currentTime;
 private double maxTimeLapse;
 
 public void work() {
-	if (previousAcitvity != work)
-		float startTime = (float)this.getCurrentTime();
-	
+	if (!this.isWorking())
+		startTime = (float)this.getCurrentTime();
 	this.activityStatus = "work";
 	float endTime = startTime + (float)500/this.getStrength();
 	if ((float)this.getCurrentTime() >= endTime)
@@ -527,8 +526,14 @@ public boolean isWorking() {
 public void attack(Unit unit) {
 	if ((this.getCube() == unit.getCube()) 
 			|| (this.getCube().isNeighbourBlock(unit.getCube())))
+		if (!this.isAttacking())
+			startTime = (float)this.getCurrentTime();
 		this.activityStatus = "attack";
-		unit.defenseAgainst(this);
+		if ((float)this.getCurrentTime() >= startTime + 1)
+			this.activityStatus = "default";
+		else 
+			unit.defenseAgainst(this);
+			unit.activityStatus = "defend";
 }
 
 public boolean isAttacking() {
@@ -545,8 +550,19 @@ public boolean isUnderAttack() {
 		return false;
 }
 
-public void rest(Unit unit) {
+public void rest() {
 	this.activityStatus = "rest";
+	if (!this.isResting())
+		startTime = (float)this.getCurrentTime();
+	if (this.getCurrentTime() >= startTime + 0.2)
+		this.activityStatus = "default";
+		if (this.getHitpoints() < this.getMaxHitpoints() && (!this.isUnderAttack()) )
+			this.setHitpoints(this.getHitpoints() + this.getToughness()/200);
+		else if (this.getStamina() < this.getMaxStamina() && (!this.isUnderAttack()))
+			this.setStamina(this.getStamina() + this.getToughness()/100);
+	else
+		rest();
+	
 }
 
 public boolean isResting() {
@@ -554,10 +570,10 @@ public boolean isResting() {
 		return true;
 	else
 		return false;
-				
 }
 
 public String activityStatus;
+public float startTime;
 
 public void defenseAgainst(Unit unit) {	
 	this.activityStatus = "defend";
@@ -572,7 +588,6 @@ public void defenseAgainst(Unit unit) {
 		this.defenseAgainst(unit);
 	else
 		this.setHitpoints(this.getHitpoints() - unit.getStrength()/10);
-	// tijd moet 1 seconde verspringen
 		
 		
 }
@@ -749,11 +764,4 @@ public void setOrientation(float orientation) {
 private float orientation;
 
 
-// 	NOG NIET MET TEMPLATES
-
-//public void rest() {
-//	if (this.hitpoints != this.getMaxHitpoints() && (!this.isUnderAttack()) )
-//		this.hitpoints = this.hitpoints + this.toughness/200;
-//	else if (this.stamina != this.getMaxStamina() && (!this.isUnderAttack()))
-//		this.stamina = this.stamina + this.toughness/100;
 }
