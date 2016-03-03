@@ -426,7 +426,9 @@ public void setStamina(int stamina) {
  * Variable registering the stamina of this unit.
  */
 private int stamina;
-private int maxStamina = this.getWeight()*this.getToughness()/50;
+public int getMaxStamina() {
+	return this.getWeight()*this.getToughness()/50;
+}
 
 /**
  * Return the hitpoints of this Unit.
@@ -443,10 +445,10 @@ public int getHitpoints() {
  * @param  hitpoints
  *         The hitpoints to check.
  * @return 
- *       | result == 0 < hitpoints <= maxHitpoints
+ *       | result == 0 < hitpoints <= getMaxHitpoints()
 */
 public boolean isValidHitpoints(int hitpoints) {
-	return ((0 < hitpoints) && (hitpoints <= maxHitpoints));
+	return ((0 < hitpoints) && (hitpoints <= this.getMaxHitpoints()));
 }
 
 /**
@@ -471,7 +473,9 @@ public void setHitpoints(int hitpoints) {
  * Variable registering the hitpoints of this Unit.
  */
 private int hitpoints;
-private int maxHitpoints = this.getWeight()*this.getToughness()/50;
+public int getMaxHitpoints() {
+	return this.getWeight()*this.getToughness()/50;
+}
 
 
 public void advanceTime(double timeLapse) throws IllegalArgumentException {
@@ -606,6 +610,32 @@ public void setPosition(Vector position)
  */
 private Vector position;
 
+
+/**
+ * Return the Cube of this Unit.
+ */
+@Basic @Raw
+public Cube getCube() {
+	return this.getPosition().getCube();
+}
+
+/**
+ * Check whether the given Cube is a valid Cube for
+ * any Unit.
+ *  
+ * @param  Cube
+ *         The Cube to check.
+ * @return 
+ *       | result == //TODO
+*/
+public static boolean isValidCube(Cube Cube) {
+	return false;
+}
+
+/**
+ * Variable registering the cube of this Unit.
+ */
+private Cube cube;
 
 // TODO Dit moet weer vanboven komen.
 /**

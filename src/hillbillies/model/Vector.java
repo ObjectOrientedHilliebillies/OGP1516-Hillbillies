@@ -28,6 +28,14 @@ public class Vector {
 		return vectorArray;
 	}
 	
+	public double[] getVector() {
+		double[] vectorArray = new double[3];
+		vectorArray[0] = this.getXCoord();
+		vectorArray[1] = this.getYCoord();
+		vectorArray[2] = this.getZCoord();
+		return vectorArray;
+	}
+	
 	// TODO Ik weet niet of dit helemaal mag.
 	public Cube getCube(){
 		return new Cube(this);
