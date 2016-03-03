@@ -483,6 +483,11 @@ public void advanceTime(double timeLapse) throws IllegalArgumentException {
 		throw new IllegalArgumentException();
 	else
 		this.setTime(this.currentTime + timeLapse);
+		if (isSprinting())
+		else if (isMoving())
+		else if (isWorking())
+		else if (isAttacking())
+		else if (isResting())
 }
 
 public boolean isValidTimeLapse(double timeLapse) {
@@ -501,25 +506,61 @@ private double currentTime;
 private double maxTimeLapse;
 
 public void work() {
-	double currentTime = this.getCurrentTime();
-	double workPeriod = 500/this.getStrength();
-	double endTime = currentTime + workPeriod;
-	for(this.getCurrentTime(); this.getCurrentTime()<=endTime 
-			&& (!this.isUnderAttack()) // en niet moet rusten en geen andere taak
-			; this.advanceTime(0.2)) {
-	}
+	if (previousAcitvity != work)
+		float startTime = (float)this.getCurrentTime();
+	
+	this.activityStatus = "work";
+	float endTime = startTime + (float)500/this.getStrength();
+	if ((float)this.getCurrentTime() >= endTime)
+		this.activityStatus = "default";
+	else
+		work();
+}
+
+public boolean isWorking() {
+	if (this.activityStatus == "work")
+		return true;
+	else
+		return false;
 }
 
 public void attack(Unit unit) {
-	if ((this.getOccupiedBlock() == unit.getOccupiedBlock) 
-			|| (Vector.getCube().isNeighbourBlock(unit.getOccupiedBlock)))
+	if ((this.getCube() == unit.getCube()) 
+			|| (this.getCube().isNeighbourBlock(unit.getCube())))
+		this.activityStatus = "attack";
 		unit.defenseAgainst(this);
 }
 
-public boolean isUnderAttack() {
+public boolean isAttacking() {
+	if (this.activityStatus == "attack")
+		return true;
+	else
+		return false;
 }
 
+public boolean isUnderAttack() {
+	if (this.activityStatus == "defend")
+		return true;
+	else
+		return false;
+}
+
+public void rest(Unit unit) {
+	this.activityStatus = "rest";
+}
+
+public boolean isResting() {
+	if (this.activityStatus == "rest")
+		return true;
+	else
+		return false;
+				
+}
+
+public String activityStatus;
+
 public void defenseAgainst(Unit unit) {	
+	this.activityStatus = "defend";
 	// First step: try to dodge
 	double dodgeChance = 0.2*unit.getAgility()/this.getAgility();
 	double blockChance = 0.25*(unit.getStrength() + unit.getAgility())/
