@@ -5,16 +5,6 @@ package hillbillies.model;
 
 import java.util.Random;
 
-// unit has a position, occupied block (defensive), 
-//			  name (defensive), 
-//			  weight, strength, agility, toughness (total)
-//			  stamina, hitpoints (nominal)		
-//			  orientation (total)
-//			  interaction with game world (defensive)
-
-// COMMENTS
-// 	TODO Ik denk dat we omslachtig zijn geweest door altijd setVariable te gebruiken in plaats van gewoon this.variable = variable. 
-
 import be.kuleuven.cs.som.annotate.Basic;
 import be.kuleuven.cs.som.annotate.Immutable;
 import be.kuleuven.cs.som.annotate.Raw;;
@@ -52,10 +42,27 @@ public class Unit {
 
 
 	/**
- * Initialize this new unit with given weight. 
- * 
+ * Initialize this new unit with given name, given initialPosition, given weight, given agility, 
+ * given strength, given toughness, given enableDefaultBehavior, maximal hitpoints, maximal stamina,
+ * .
+ * @param  name
+ *         The name for this new unit.
+ * @param  initialPosition
+ *         The initial position for this new unit.
  * @param  weight
  *         The weight for this new unit.
+ * @param  agility
+ *         The agility for this new unit.
+ * @param  strength
+ *         The strength for this new unit.
+ * @param  toughness
+ *         The toughness for this new unit.  
+ * @param  enableDefaultBehavior
+ *         Enables default behavior for this new unit.
+ * @pre    The maximal hitpoints must be a valid hitpoints for any Unit.
+ *       | isValidHitpoints(this.getMaxHitpoints)
+ * @pre    The given stamina must be a valid stamina for any unit.
+ *       | isValidStamina(stamina)
  * @post   If the given weight is a valid weight for any unit,
  *         the weight of this new unit is equal to the given
  *         weight. Otherwise, the weight of this new unit is equal
@@ -63,23 +70,6 @@ public class Unit {
  *       | if (isValidWeight(weight))
  *       |   then new.getWeight() == weight
  *       |   else new.getWeight() == (strength+agility)/2
- *       
- * Initialize this new unit with given strength.
- * 
- * @param  strength
- *         The strength for this new unit.
- * @post   If the given strength is a valid strength for any unit,
- *         the strength of this new unit is equal to the given
- *         strength. Otherwise, the strength of this new unit is equal
- *         to 25.
- *       | if (isValidStrength(strength))
- *       |   then new.getStrength() == strength
- *       |   else new.getStrength() == 25
- *       
- * Initialize this new unit with given agility.
- * 
- * @param  agility
- *         The agility for this new unit.
  * @post   If the given agility is a valid agility for any unit,
  *         the agility of this new unit is equal to the given
  *         agility. Otherwise, the agility of this new unit is equal
@@ -87,11 +77,13 @@ public class Unit {
  *       | if (isValidAgility(agility))
  *       |   then new.getAgility() == agility
  *       |   else new.getAgility() == 25
- *       
- * Initialize this new unit with given toughness.
- * 
- * @param  toughness
- *         The toughness for this new unit.
+ * @post   If the given strength is a valid strength for any unit,
+ *         the strength of this new unit is equal to the given
+ *         strength. Otherwise, the strength of this new unit is equal
+ *         to 25.
+ *       | if (isValidStrength(strength))
+ *       |   then new.getStrength() == strength
+ *       |   else new.getStrength() == 25
  * @post   If the given toughness is a valid toughness for any unit,
  *         the toughness of this new unit is equal to the given
  *         toughness. Otherwise, the toughness of this new unit is equal
@@ -99,30 +91,15 @@ public class Unit {
  *       | if (isValidToughness(toughness))
  *       |   then new.getToughness() == toughness
  *       |   else new.getToughness() == 25
- *       
- * Initialize this new unit with given stamina.
- * 
- * @param  stamina
- *         The stamina for this new unit.
- * @pre    The given stamina must be a valid stamina for any unit.
- *       | isValidStamina(stamina)
+ * @post   The hitpoints of this new Unit is equal to the maximal
+ *         hitpoints.
+ *       | new.getHitpoints() == this.getMaxHitpoints
  * @post   The stamina of this new unit is equal to the given
  *         stamina.
  *       | new.getStamina() == stamina
- *       
- * 
- * Initialize this new Unit with given hitpoints.
- * 
- * @param  hitpoints
- *         The hitpoints for this new Unit.
- * @pre    The given hitpoints must be a valid hitpoints for any Unit.
- *       | isValidHitpoints(hitpoints)
- * @post   The hitpoints of this new Unit is equal to the given
- *         hitpoints.
- *       | new.getHitpoints() == hitpoints
  */
-public Unit(int weight, int strength, int agility, int toughness, String Name, 
-		int stamina, int hitpoints)
+public Unit(String name, int[] initialPosition, int weight, int agility, int strength, int toughness,
+		boolean enableDefaultBehavior)
 		throws IllegalArgumentException {
 //	if (! isValidWeight(weight))
 //		weight = (strength+agility)/2;
@@ -131,7 +108,7 @@ public Unit(int weight, int strength, int agility, int toughness, String Name,
 //	if (! isValidStrength(strength))
 //		strength = 25;
 //	else
-		this.setStrength(weight);
+		this.setStrength(strength);
 //	if (! isValidAgility(agility))
 //		agility = 25;
 //	else
@@ -141,9 +118,7 @@ public Unit(int weight, int strength, int agility, int toughness, String Name,
 //	else
 		this.setToughness(toughness);
 	
-	this.setName(Name);
-	this.setStamina(stamina);
-	this.setHitpoints(hitpoints);
+	this.setName(name);
 }
 
 /**

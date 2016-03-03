@@ -9,9 +9,9 @@ public class Facade implements IFacade {
 	public Unit createUnit(String name, int[] initialPosition, int weight, int agility, int strength, int toughness,
 			boolean enableDefaultBehavior) throws ModelException {	
 		
-		return null;
+		return new Unit(name, initialPosition, weight, agility, strength, toughness, enableDefaultBehavior);
 	}
-
+	
 	@Override
 	public double[] getPosition(Unit unit) throws ModelException {
 		// TODO Auto-generated method stub	
