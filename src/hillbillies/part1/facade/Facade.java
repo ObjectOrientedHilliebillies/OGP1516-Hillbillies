@@ -14,7 +14,6 @@ public class Facade implements IFacade {
 	
 	@Override
 	public double[] getPosition(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub	
 		return unit.getPosition().getVector();
 	}
 
@@ -30,8 +29,11 @@ public class Facade implements IFacade {
 
 	@Override
 	public void setName(Unit unit, String newName) throws ModelException {
-		unit.setName(newName);
-		
+		try {unit.setName(newName);
+		}
+		catch (IllegalArgumentException exc) {
+			throw new ModelException();
+		}
 	}
 
 	@Override
