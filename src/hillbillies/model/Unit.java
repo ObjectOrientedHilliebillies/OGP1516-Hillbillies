@@ -45,6 +45,7 @@ public class Unit {
  * Initialize this new unit with given name, given initialPosition, given weight, given agility, 
  * given strength, given toughness, given enableDefaultBehavior, maximal hitpoints, maximal stamina,
  * .
+ * 		// TODO orientation
  * @param  name
  *         The name for this new unit.
  * @param  initialPosition
@@ -101,9 +102,7 @@ public class Unit {
 public Unit(String name, int[] initialPosition, int weight, int agility, int strength, int toughness,
 		boolean enableDefaultBehavior)
 		throws IllegalArgumentException {
-//	if (! isValidWeight(weight))
-//		weight = (strength+agility)/2;
-//	else
+	
 		this.setWeight(weight);
 //	if (! isValidStrength(strength))
 //		strength = 25;
