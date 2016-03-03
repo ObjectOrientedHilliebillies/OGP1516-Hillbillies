@@ -3,13 +3,21 @@ package hillbillies.model;
 
 
 
+import java.awt.Component;
 import java.util.Random;
+
+import org.junit.experimental.theories.Theories;
 
 import be.kuleuven.cs.som.annotate.Basic;
 import be.kuleuven.cs.som.annotate.Immutable;
 import be.kuleuven.cs.som.annotate.Raw;;
 
+// TODO Als de strength ofzo veranderd kan het zijn dat de unit zijn weight niet meer legaal is.
+
 /**
+ * @invar  The position of each unit must be a valid position for any
+ *         unit.
+ *       | isValidPosition(getPosition())
  * @invar  The weight of each unit must be a valid weight for any
  *         unit.
  *       | isValidWeight(getWeight())
@@ -41,6 +49,8 @@ import be.kuleuven.cs.som.annotate.Raw;;
 public class Unit {
 
 
+	private static final int cubesPerRib = 50;
+
 	/**
  * Initialize this new unit with given name, given initialPosition, given weight, given agility, 
  * given strength, given toughness, given enableDefaultBehavior, maximal hitpoints, maximal stamina,
@@ -64,6 +74,9 @@ public class Unit {
  *       | isValidHitpoints(this.getMaxHitpoints)
  * @pre    The given stamina must be a valid stamina for any unit.
  *       | isValidStamina(stamina)
+ * @effect The position of this new unit is set to
+ *         the given position.
+ *       | this.setPosition(position)
  * @post   If the given weight is a valid weight for any unit,
  *         the weight of this new unit is equal to the given
  *         weight. Otherwise, the weight of this new unit is equal
@@ -103,21 +116,42 @@ public Unit(String name, int[] initialPosition, int weight, int agility, int str
 		boolean enableDefaultBehavior)
 		throws IllegalArgumentException {
 	
-		this.setWeight(weight);
-//	if (! isValidStrength(strength))
-//		strength = 25;
-//	else
+	this.setName(name);
+	
+	try {
+		double[] coordinates = new double[3];
+		coordinates[0] = (double) initialPosition[0];
+		coordinates[1] = (double) initialPosition[1];
+		coordinates[2] = (double) initialPosition[2];
+		this.setPosition(coordinates);
+	} catch (IllegalPositionException e) {
+		// TODO Auto-generated catch block. EN GAAN WE DAN GEEN DEFAULT POSITIE SETTEN?
+		e.printStackTrace();
+	}
+	
+	
+	if (isValidWeight(weight))
+		this.weight = weight;
+	else 
+		this.weight = minWeight;
+	
+	if (! isValidStrength(strength))
+		strength = 25;
+	else
 		this.setStrength(strength);
-//	if (! isValidAgility(agility))
-//		agility = 25;
-//	else
+	
+	if (! isValidAgility(agility))
+		agility = 25;
+	else
 		this.setAgility(agility);
-//	if (! isValidToughness(toughness))
-//		toughness = 25;
-//	else
+	
+	if (! isValidToughness(toughness))
+		toughness = 25;
+	else
 		this.setToughness(toughness);
 	
-	this.setName(name);
+	
+	
 }
 
 /**
@@ -139,7 +173,7 @@ public int getWeight() {
 */
 
 public boolean isValidWeight(int weight) {
-	return (weight >=(this.getStrength() + this.getAgility())/2 
+	return (weight >= minWeight 
 			&& weight <= maxWeight);
 }
 
@@ -154,14 +188,14 @@ public boolean isValidWeight(int weight) {
  *       | if (isValidWeight(weight))
  *       |   then new.getWeight() == weight
  *       | else
- *       |	 new.getWeight() == defaultWeight
+ *       |	 new.getWeight() == minWeight
  */
 @Raw
 public void setWeight(int weight) {
 	if (isValidWeight(weight))
 		this.weight = weight;
 	else 
-		this.weight = defaultWeight;
+		this.weight = minWeight;
 }
 
 /**
@@ -169,7 +203,7 @@ public void setWeight(int weight) {
  */
 private int weight;
 private static int maxWeight = 200;
-private int defaultWeight = (this.getStrength() + this.getAgility())/2;
+private int minWeight = (this.getStrength() + this.getAgility())/2;
 
 /**
  * Return the strength of this unit.
@@ -397,12 +431,18 @@ public void setStamina(int stamina) {
 }
 
 /**
+ * Return the maximal stamina of this unit.
+ */
+public int getMaxStamina() {
+	return maxStamina;	
+}
+
+/**
  * Variable registering the stamina of this unit.
  */
 private int stamina;
-public int getMaxStamina() {
-	return this.getWeight()*this.getToughness()/50;
-}
+private int maxStamina = this.getWeight()*this.getToughness()/50;
+
 
 /**
  * Return the hitpoints of this Unit.
@@ -450,7 +490,6 @@ private int hitpoints;
 public int getMaxHitpoints() {
 	return this.getWeight()*this.getToughness()/50;
 }
-
 
 public void advanceTime(double timeLapse) throws IllegalArgumentException {
 	if (!isValidTimeLapse(timeLapse))
@@ -546,41 +585,14 @@ public void defenseAgainst(Unit unit) {
 		this.defenseAgainst(unit);
 	else
 		this.setHitpoints(this.getHitpoints() - unit.getStrength()/10);
-	// tijd moet 1 seconde verspringen
-		
-		
+	// tijd moet 1 seconde verspringen		
 }
-
-// 	NOG NIET MET TEMPLATES
-
-// TODO Dit op de juiste plek zetten
-/** TO BE ADDED TO CLASS HEADING
- * @invar  The position of each unit must be a valid position for any
- *         unit.
- *       | isValidPosition(getPosition())
- */
-
-
-/**
- * Initialize this new unit with given position.
- *
- * @param  position
- *         The position for this new unit.
- * @effect The position of this new unit is set to
- *         the given position.
- *       | this.setPosition(position)
- */
-public Unit(Vector position)
-		throws IllegalPositionException {
-	this.setPosition(position);
-}
-
 
 /**
  * Return the position of this unit.
  */
 @Basic @Raw
-public Vector getPosition() {
+public double[] getPosition() {
 	return this.position;
 }
 
@@ -594,9 +606,12 @@ public Vector getPosition() {
  *       | result == 
  *       // TODO Deze check aanvullen.
 */
-public static boolean isValidPosition(Vector position) {
-	return position.inBorders();
-	// TODO Een test maken om dit uit te testen
+public static boolean isValidPosition(double[] position) {
+	for (double comp : position){
+		if ((comp < 0) || (comp > cubesPerRib))
+			return false;
+	}
+	return true;
 }
 
 /**
@@ -613,7 +628,7 @@ public static boolean isValidPosition(Vector position) {
  *       | ! isValidPosition(getPosition())
  */
 @Raw
-public void setPosition(Vector position) 
+public void setPosition(double[] position) 
 		throws IllegalPositionException {
 	if (! isValidPosition(position))
 		throw new IllegalPositionException();
@@ -623,15 +638,19 @@ public void setPosition(Vector position)
 /**
  * Variable registering the position of this unit.
  */
-private Vector position;
+private double[] position;
 
 
 /**
  * Return the Cube of this Unit.
  */
 @Basic @Raw
-public Cube getCube() {
-	return this.getPosition().getCube();
+public int[] getCube() {
+	int[] cubeArray = new int[3];
+	cubeArray[0] = (int) position[0];
+	cubeArray[1] = (int) position[1];
+	cubeArray[2] = (int) position[2];
+	return cubeArray;
 }
 
 /**

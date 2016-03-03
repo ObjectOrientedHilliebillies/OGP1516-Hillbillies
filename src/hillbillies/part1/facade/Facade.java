@@ -14,12 +14,12 @@ public class Facade implements IFacade {
 	
 	@Override
 	public double[] getPosition(Unit unit) throws ModelException {
-		return unit.getPosition().getVector();
+		return unit.getPosition();
 	}
 
 	@Override
 	public int[] getCubeCoordinate(Unit unit) throws ModelException {
-		return unit.getCube().getIntCube();
+		return unit.getCube();
 	}
 
 	@Override
