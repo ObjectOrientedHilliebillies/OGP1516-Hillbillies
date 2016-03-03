@@ -3,6 +3,8 @@ package hillbillies.model;
 
 
 
+import java.util.Random;
+
 // unit has a position, occupied block (defensive), 
 //			  name (defensive), 
 //			  weight, strength, agility, toughness (total)
@@ -161,6 +163,7 @@ public int getWeight() {
  * @return 
  *       | result == maxWeight > weight >= (strength+agility)/2 
 */
+
 public boolean isValidWeight(int weight) {
 	return (weight >=(this.getStrength() + this.getAgility())/2 
 			&& weight <= maxWeight);
@@ -423,7 +426,9 @@ public void setStamina(int stamina) {
  * Variable registering the stamina of this unit.
  */
 private int stamina;
-private int maxStamina = this.getWeight()*this.getToughness()/50;
+public int getMaxStamina() {
+	return this.getWeight()*this.getToughness()/50;
+}
 
 /**
  * Return the hitpoints of this Unit.
@@ -440,10 +445,10 @@ public int getHitpoints() {
  * @param  hitpoints
  *         The hitpoints to check.
  * @return 
- *       | result == 0 < hitpoints <= maxHitpoints
+ *       | result == 0 < hitpoints <= getMaxHitpoints()
 */
 public boolean isValidHitpoints(int hitpoints) {
-	return ((0 < hitpoints) && (hitpoints <= maxHitpoints));
+	return ((0 < hitpoints) && (hitpoints <= this.getMaxHitpoints()));
 }
 
 /**
@@ -468,7 +473,9 @@ public void setHitpoints(int hitpoints) {
  * Variable registering the hitpoints of this Unit.
  */
 private int hitpoints;
-private int maxHitpoints = this.getWeight()*this.getToughness()/50;
+public int getMaxHitpoints() {
+	return this.getWeight()*this.getToughness()/50;
+}
 
 
 public void advanceTime(double timeLapse) throws IllegalArgumentException {
@@ -493,6 +500,43 @@ public void setTime(double time) {
 private double currentTime;
 private double maxTimeLapse;
 
+public void work() {
+	double currentTime = this.getCurrentTime();
+	double workPeriod = 500/this.getStrength();
+	double endTime = currentTime + workPeriod;
+	for(this.getCurrentTime(); this.getCurrentTime()<=endTime 
+			&& (!this.isUnderAttack()) // en niet moet rusten en geen andere taak
+			; this.advanceTime(0.2)) {
+	}
+}
+
+public void attack(Unit unit) {
+	if ((this.getOccupiedBlock() == unit.getOccupiedBlock) 
+			|| (Vector.getCube().isNeighbourBlock(unit.getOccupiedBlock)))
+		unit.defenseAgainst(this);
+}
+
+public boolean isUnderAttack() {
+}
+
+public void defenseAgainst(Unit unit) {	
+	// First step: try to dodge
+	double dodgeChance = 0.2*unit.getAgility()/this.getAgility();
+	double blockChance = 0.25*(unit.getStrength() + unit.getAgility())/
+			(this.getAgility() + this.getStrength());
+	if (Math.random() <= dodgeChance)
+		double xCoord = Vector.getXCoord(); // iets vinden om dat random te maken
+	else if (Math.random() <= blockChance)
+		// er gebeurt niets
+		this.defenseAgainst(unit);
+	else
+		this.setHitpoints(this.getHitpoints() - unit.getStrength()/10);
+	// tijd moet 1 seconde verspringen
+		
+		
+}
+
+// 	NOG NIET MET TEMPLATES
 
 // TODO Dit op de juiste plek zetten
 /** TO BE ADDED TO CLASS HEADING
@@ -566,6 +610,32 @@ public void setPosition(Vector position)
  */
 private Vector position;
 
+
+/**
+ * Return the Cube of this Unit.
+ */
+@Basic @Raw
+public Cube getCube() {
+	return this.getPosition().getCube();
+}
+
+/**
+ * Check whether the given Cube is a valid Cube for
+ * any Unit.
+ *  
+ * @param  Cube
+ *         The Cube to check.
+ * @return 
+ *       | result == //TODO
+*/
+public static boolean isValidCube(Cube Cube) {
+	return false;
+}
+
+/**
+ * Variable registering the cube of this Unit.
+ */
+private Cube cube;
 
 // TODO Dit moet weer vanboven komen.
 /**
