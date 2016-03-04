@@ -98,8 +98,7 @@ public class Facade implements IFacade {
 
 	@Override
 	public void advanceTime(Unit unit, double dt) throws ModelException {
-		// TODO Auto-generated method stub
-		
+		unit.advanceTime(dt);
 	}
 
 	@Override
@@ -152,14 +151,12 @@ public class Facade implements IFacade {
 
 	@Override
 	public void work(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
-		
+		unit.work();
 	}
 
 	@Override
 	public boolean isWorking(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
-		return false;
+		return unit.isWorking();
 	}
 
 	@Override
@@ -176,14 +173,12 @@ public class Facade implements IFacade {
 
 	@Override
 	public void rest(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
-		
+		unit.rest();		
 	}
 
 	@Override
 	public boolean isResting(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
-		return false;
+		return unit.isResting();
 	}
 
 	@Override
