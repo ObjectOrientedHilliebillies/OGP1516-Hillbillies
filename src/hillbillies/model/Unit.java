@@ -1,8 +1,5 @@
 package hillbillies.model;
 
-
-
-
 import java.awt.Component;
 import java.sql.Time;
 import java.util.Random;
@@ -11,7 +8,9 @@ import org.junit.experimental.theories.Theories;
 
 import be.kuleuven.cs.som.annotate.Basic;
 import be.kuleuven.cs.som.annotate.Immutable;
-import be.kuleuven.cs.som.annotate.Raw;;
+import be.kuleuven.cs.som.annotate.Raw;
+
+import ogp.framework.util.Util;
 
 // TODO Als de strength ofzo veranderd kan het zijn dat de unit zijn weight niet meer legaal is.
 
@@ -159,6 +158,7 @@ public Unit(String name, int[] initialPosition, int weight, int agility, int str
 		this.setToughness(toughness);
 	
 	setHitpoints(getMaxHitpoints()-30);
+	setStamina(getMaxStamina()-30);
 	
 	this.orientation = (float) (Math.PI/2);
 	
@@ -268,7 +268,6 @@ public String getName() {
 				&& name.matches("[a-zA-Z ']")
 */
 public static boolean isValidName(String unitName) {
-	System.out.println("val = " + unitName);
 	return Character.isUpperCase(unitName.charAt(0)) && unitName.length() >= 2 
 			&& unitName.matches("[a-zA-Z ']+");
 }
@@ -503,7 +502,7 @@ public int getStamina() {
  *       | result == 0 < stamina < maxStamina
 */
 public boolean isValidStamina(int stamina) {
-	return (0 < stamina && stamina < maxStamina);
+	return (0 < stamina && stamina < this.getMaxStamina());
 }
 
 /**
@@ -528,14 +527,16 @@ public void setStamina(int stamina) {
  * Return the maximal stamina of this unit.
  */
 public int getMaxStamina() {
-	return maxStamina;	
+	int maxStamina = this.getWeight()*this.getToughness()/50;
+	if ((this.getWeight()*this.getToughness())%50 == 0)
+		return maxStamina;
+	return maxStamina+1;
 }
 
 /**
  * Variable registering the stamina of this unit.
  */
 private int stamina;
-private int maxStamina = this.getWeight()*this.getToughness()/50;
 
 /**
  * Return the hitpoints of this Unit.
@@ -601,8 +602,8 @@ public void advanceTime(double tickTime) throws IllegalArgumentException {
 			System.out.println("3 min zijn om");
 		}
 //		if (isUnderAttack()){
-//			activeActivity = "default";
-//			lastActivity = "default";
+//			activeActivity = null;
+//			lastActivity = null;
 //			doDefend();
 //		}
 		else if (isWorking())
@@ -615,7 +616,7 @@ public void advanceTime(double tickTime) throws IllegalArgumentException {
 }
 
 public boolean isValidTickTime(double tickTime) {
-	return ((0 < tickTime) && (tickTime < maxTimeLapse));
+	return ((0 < tickTime) && (Util.fuzzyGreaterThanOrEqualTo( maxTimeLapse, tickTime)));
 }
 
 public double getCurrentTime() {
@@ -629,7 +630,6 @@ public void setTime(double time) {
 private double currentTime;
 private double maxTimeLapse = 0.2;
 private String activeActivity;
-private String lastActivity;
 private double endTime;
 private double activityStartTime;
 private double lastTimeRested =0.2;
@@ -686,28 +686,22 @@ private float orientation;
 
 /* Working */
 public void work(){
-	if (isValidActivity("work"))
-		this.activeActivity = "work";
+	if (!isValidActivity("work"))
+		throw new IllegalArgumentException();
+	if (activeActivity != "work"){
+		activeActivity = "work";
+		this.endTime = this.getCurrentTime() + 500/(double)(this.getStrength());
+	}
 }
 
 public void doWork() {
 	// Waarom was hier al het tijdwerk in float gedaan?
-	if (!this.wasWorking()){
-		this.endTime = this.getCurrentTime() + (double)500/this.getStrength();
-		this.lastActivity = "work";
-	}
-	if (this.getCurrentTime() >= endTime)
-		this.lastActivity = "default";
+	if (Util.fuzzyGreaterThanOrEqualTo(this.getCurrentTime(), endTime))
+		this.activeActivity = null;
 }
 
 public boolean isWorking() {
 	if (this.activeActivity == "work")
-		return true;
-	return false;
-}
-
-public boolean wasWorking() {
-	if (this.lastActivity == "work")
 		return true;
 	return false;
 }
@@ -720,7 +714,7 @@ public void attack(Unit unit) {
 			activityStartTime = (float)this.getCurrentTime();
 		this.activityStatus = "attack";
 		if ((float)this.getCurrentTime() >= activityStartTime + 1)
-			this.activityStatus = "default";
+			this.activityStatus = null;
 		else 
 			unit.defenseAgainst(this);
 			unit.activityStatus = "defend";
@@ -757,33 +751,21 @@ public void defenseAgainst(Unit unit) {
 
 /* Resting */
 
-private double recoverdPoints = 0;
+private double recoverdPoints;
 
 /**
  * Check whether the given activity is a valid activity for this unit.
  * @param  activity
  *         The activity to check.
  * @return 
- *       | result == 
+ *       | result == !(this.isResting() && recoverdPoints<1)
  *       // TODO Deze check aanvullen.
 */
 private boolean isValidActivity(String activity){
-	System.out.println("go");
-	if (activity == "defending")
-		return true;
-	System.out.println("nog aan het pitten?");
 	if (this.isResting() && recoverdPoints<1)
 		return false;
-	
-	System.out.println("Heeft het geen zin?");
-	if (activity == "rest" && getCurrentTime()-lastTimeRested < 180 && 
-			hitpoints == getMaxHitpoints() && stamina == getMaxStamina())
-		return false;
-	System.out.println("alles ok");
 	return true;
 }
-
-
 
 /**
  * Set the activity of this unit to resting.
@@ -797,31 +779,30 @@ private boolean isValidActivity(String activity){
 public void rest() throws IllegalArgumentException{
 	if (!isValidActivity("rest"))
 		throw new IllegalArgumentException();
-	this.activeActivity = "rest";
-	if (!wasResting()){
-		// Time starts so we can detect if the user changes his mind in 0.2 sec and wants to change
-		// (wish is not allowed)
+	if (activeActivity != "rest"){
+		recoverdPoints = 0;
 		activityStartTime = this.getCurrentTime();
+		this.activeActivity = "rest";
 	}
 }
 
-public void doRest() {
-	if (!this.wasResting()){
-		System.out.println("begin te rusten");
-		activityStartTime = this.getCurrentTime();
-		recoverdPoints = 0;
-		this.lastActivity = "rest";
-	}
+private void doRest() {
 	double oldRecoverdPoints = recoverdPoints;
 	recoverdPoints = (this.getCurrentTime()-activityStartTime)*this.getToughness()/200/0.2;
-	if (recoverdPoints>1){
+	if (Util.fuzzyGreaterThanOrEqualTo(recoverdPoints,1)){
 		lastTimeRested = getCurrentTime();
-		if (hitpoints != getMaxHitpoints())
+		if (hitpoints != getMaxHitpoints()){
 			hitpoints = hitpoints - (int) (oldRecoverdPoints) + (int) (recoverdPoints);
-		else if (stamina != getMaxStamina())
+			if (hitpoints > getMaxHitpoints())
+				hitpoints = getMaxHitpoints();
+		}
+		else if (stamina != getMaxStamina()){
 			stamina = stamina - (int) (oldRecoverdPoints * 2) + (int) (recoverdPoints*2);
+			if (stamina > getMaxStamina())
+				stamina = getMaxStamina();
+		}
 		if (hitpoints == getMaxHitpoints() && stamina == getMaxStamina())
-			activeActivity = "default";
+			activeActivity = null;
 	}
 }
 
@@ -832,12 +813,6 @@ public boolean isResting() {
 		return false;
 }
 
-public boolean wasResting() {
-	if (this.lastActivity == "rest")
-		return true;
-	else
-		return false;
-}
-
 /* Default behavior */
+
 }
