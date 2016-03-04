@@ -1,22 +1,24 @@
 package hillbillies.model;
 
 
-// unit has a position, occupied block (defensive), 
-//			  name (defensive), 
-//			  weight, strength, agility, toughness (total)
-//			  stamina, hitpoints (nominal)		
-//			  orientation (total)
-//			  interaction with game world (defensive)
 
-// COMMENTS
-//		Ik denk dat we omslachtig zijn geweest door altijd setVariable te gebruiken
-//		in plaats van gewoon this.variable = variable. 
+
+import java.awt.Component;
+import java.sql.Time;
+import java.util.Random;
+
+import org.junit.experimental.theories.Theories;
 
 import be.kuleuven.cs.som.annotate.Basic;
 import be.kuleuven.cs.som.annotate.Immutable;
 import be.kuleuven.cs.som.annotate.Raw;;
 
+// TODO Als de strength ofzo veranderd kan het zijn dat de unit zijn weight niet meer legaal is.
+
 /**
+ * @invar  The position of each unit must be a valid position for any
+ *         unit.
+ *       | isValidPosition(getPosition())
  * @invar  The weight of each unit must be a valid weight for any
  *         unit.
  *       | isValidWeight(getWeight())
@@ -40,6 +42,9 @@ import be.kuleuven.cs.som.annotate.Raw;;
  * @invar  The hitpoints of each Unit must be a valid hitpoints for any
  *         Unit.
  *       | isValidHitpoints(getHitpoints())
+ * @invar  The orientation of each unit must be a valid orientation for any
+ *         unit.
+ *       | isValidOrientation(getOrientation())
  *       
  * @version 1.0
  * @author  Jonas Vantrappen & Victor Van Eetvelt
@@ -48,11 +53,35 @@ import be.kuleuven.cs.som.annotate.Raw;;
 public class Unit {
 
 
+private static final int cubesPerRib = 50;
+
+/* Unit creation */
 	/**
- * Initialize this new unit with given weight. 
+ * Initialize this new unit with given name, given initialPosition, given weight, given agility, 
+ * given strength, given toughness, given enableDefaultBehavior, maximal hitpoints, maximal stamina,
+ * default orientation.
  * 
+ * @param  name
+ *         The name for this new unit.
+ * @param  initialPosition
+ *         The initial position for this new unit.
  * @param  weight
  *         The weight for this new unit.
+ * @param  agility
+ *         The agility for this new unit.
+ * @param  strength
+ *         The strength for this new unit.
+ * @param  toughness
+ *         The toughness for this new unit.  
+ * @param  enableDefaultBehavior
+ *         Enables default behavior for this new unit.
+ * @pre    The maximal hitpoints must be a valid hitpoints for any Unit.
+ *       | isValidHitpoints(this.getMaxHitpoints)
+ * @pre    The given stamina must be a valid stamina for any unit.
+ *       | isValidStamina(stamina)
+ * @effect The position of this new unit is set to
+ *         the given position.
+ *       | this.setPosition(position)
  * @post   If the given weight is a valid weight for any unit,
  *         the weight of this new unit is equal to the given
  *         weight. Otherwise, the weight of this new unit is equal
@@ -60,23 +89,6 @@ public class Unit {
  *       | if (isValidWeight(weight))
  *       |   then new.getWeight() == weight
  *       |   else new.getWeight() == (strength+agility)/2
- *       
- * Initialize this new unit with given strength.
- * 
- * @param  strength
- *         The strength for this new unit.
- * @post   If the given strength is a valid strength for any unit,
- *         the strength of this new unit is equal to the given
- *         strength. Otherwise, the strength of this new unit is equal
- *         to 25.
- *       | if (isValidStrength(strength))
- *       |   then new.getStrength() == strength
- *       |   else new.getStrength() == 25
- *       
- * Initialize this new unit with given agility.
- * 
- * @param  agility
- *         The agility for this new unit.
  * @post   If the given agility is a valid agility for any unit,
  *         the agility of this new unit is equal to the given
  *         agility. Otherwise, the agility of this new unit is equal
@@ -84,11 +96,13 @@ public class Unit {
  *       | if (isValidAgility(agility))
  *       |   then new.getAgility() == agility
  *       |   else new.getAgility() == 25
- *       
- * Initialize this new unit with given toughness.
- * 
- * @param  toughness
- *         The toughness for this new unit.
+ * @post   If the given strength is a valid strength for any unit,
+ *         the strength of this new unit is equal to the given
+ *         strength. Otherwise, the strength of this new unit is equal
+ *         to 25.
+ *       | if (isValidStrength(strength))
+ *       |   then new.getStrength() == strength
+ *       |   else new.getStrength() == 25
  * @post   If the given toughness is a valid toughness for any unit,
  *         the toughness of this new unit is equal to the given
  *         toughness. Otherwise, the toughness of this new unit is equal
@@ -96,53 +110,196 @@ public class Unit {
  *       | if (isValidToughness(toughness))
  *       |   then new.getToughness() == toughness
  *       |   else new.getToughness() == 25
- *       
- * Initialize this new unit with given stamina.
- * 
- * @param  stamina
- *         The stamina for this new unit.
- * @pre    The given stamina must be a valid stamina for any unit.
- *       | isValidStamina(stamina)
+ * @post   The hitpoints of this new Unit is equal to the maximal
+ *         hitpoints.
+ *       | new.getHitpoints() == this.getMaxHitpoints
  * @post   The stamina of this new unit is equal to the given
  *         stamina.
  *       | new.getStamina() == stamina
- *       
- * 
- * Initialize this new Unit with given hitpoints.
- * 
- * @param  hitpoints
- *         The hitpoints for this new Unit.
- * @pre    The given hitpoints must be a valid hitpoints for any Unit.
- *       | isValidHitpoints(hitpoints)
- * @post   The hitpoints of this new Unit is equal to the given
- *         hitpoints.
- *       | new.getHitpoints() == hitpoints
+ * @post  The orientation of this new unit is equal
+ *         to PI/2.
+ *       | if (isValidOrientation(orientation))
+ *       | new.getOrientation() == PI/2
  */
-public Unit(int weight, int strength, int agility, int toughness, String Name, 
-		int stamina, int hitpoints)
+public Unit(String name, int[] initialPosition, int weight, int agility, int strength, int toughness,
+		boolean enableDefaultBehavior)
 		throws IllegalArgumentException {
-//	if (! isValidWeight(weight))
-//		weight = (strength+agility)/2;
-//	else
-		this.setWeight(weight);
-//	if (! isValidStrength(strength))
-//		strength = 25;
-//	else
-		this.setStrength(weight);
-//	if (! isValidAgility(agility))
-//		agility = 25;
-//	else
-		this.setAgility(agility);
-//	if (! isValidToughness(toughness))
-//		toughness = 25;
-//	else
+	/*  given enableDefaultBehavior, maximal hitpoints,
+	 *  maximal stamina,
+	 */
+	this.setName(name);
+	
+	try {
+		double[] coordinates = new double[3];
+		coordinates[0] = (double) initialPosition[0];
+		coordinates[1] = (double) initialPosition[1];
+		coordinates[2] = (double) initialPosition[2];
+		this.setPosition(coordinates);
+	} catch (IllegalPositionException e) {
+		// TODO Auto-generated catch block. EN GAAN WE DAN GEEN DEFAULT POSITIE SETTEN?
+		e.printStackTrace();
+	}
+	
+	
+	if (isValidWeight(weight))
+		this.weight = weight;
+	else 
+		this.weight = this.minWeight;
+	if (! isValidAgility(agility))
+		agility = 25;
+	else
+		this.setAgility(agility);	
+	if (! isValidStrength(strength))
+		strength = 25;
+	else
+		this.setStrength(strength);
+	if (! isValidToughness(toughness))
+		toughness = 25;
+	else
 		this.setToughness(toughness);
 	
-	this.setName(Name);
-	this.setStamina(stamina);
-	this.setHitpoints(hitpoints);
+	setHitpoints(getMaxHitpoints()-30);
+	
+	this.orientation = (float) (Math.PI/2);
+	
 }
 
+/* Position */
+/**
+ * Return the position of this unit.
+ */
+@Basic @Raw
+public double[] getPosition() {
+	return this.position;
+}
+
+/**
+ * Check whether the given position is a valid position for
+ * any unit.
+ *  
+ * @param  position
+ *         The position to check.
+ * @return 
+ *       | result == 
+ *       // TODO Deze check aanvullen.
+*/
+public static boolean isValidPosition(double[] position) {
+	for (double comp : position){
+		if ((comp < 0) || (comp > cubesPerRib))
+			return false;
+	}
+	return true;
+}
+
+/**
+ * Set the position of this unit to the given position.
+ * 
+ * @param  position
+ *         The new position for this unit.
+ * @post   The position of this new unit is equal to
+ *         the given position.
+ *       | new.getPosition() == position
+ * @throws IllegalPositionException
+ *         The given position is not a valid position for any
+ *         unit.
+ *       | ! isValidPosition(getPosition())
+ */
+@Raw
+public void setPosition(double[] position) 
+		throws IllegalPositionException {
+	if (! isValidPosition(position))
+		throw new IllegalPositionException();
+	this.position = position;
+}
+
+/**
+ * Variable registering the position of this unit.
+ */
+private double[] position;
+
+/**
+ * Return the Cube of this Unit.
+ */
+@Basic @Raw
+public int[] getCube() {
+	int[] cubeArray = new int[3];
+	cubeArray[0] = (int) position[0];
+	cubeArray[1] = (int) position[1];
+	cubeArray[2] = (int) position[2];
+	return cubeArray;
+}
+
+/**
+ * Check whether the given Cube is a valid Cube for
+ * any Unit.
+ *  
+ * @param  Cube
+ *         The Cube to check.
+ * @return 
+ *       | result == //TODO
+*/
+public static boolean isValidCube(Cube Cube) {
+	return false;
+}
+
+/**
+ * Variable registering the cube of this Unit.
+ */
+private Cube cube;
+
+
+/* Name */
+/**
+ * Return the name of this unit.
+ */
+@Basic @Raw
+public String getName() {
+	return this.unitName;
+}
+
+/**
+ * Check whether the given name is a valid name for
+ * any unit.
+ *  
+ * @param  name
+ *         The name to check.
+ * @return 
+ *       | result == Character.isUpperCase(name.charAt(0)) && name.length() >= 2 
+				&& name.matches("[a-zA-Z ']")
+*/
+public static boolean isValidName(String unitName) {
+	System.out.println("val = " + unitName);
+	return Character.isUpperCase(unitName.charAt(0)) && unitName.length() >= 2 
+			&& unitName.matches("[a-zA-Z ']+");
+}
+
+/**
+ * Set the name of this unit to the given name.
+ * 
+ * @param  unitName
+ *         The new name for this unit.
+ * @post   The name of this new unit is equal to
+ *         the given name.
+ *       | new.getName() == unitName
+ * @throws IllegalArgumentException
+ *         The given name is not a valid name for any
+ *         unit.
+ *       | ! isValidName(getName())
+ */
+@Raw
+public void setName(String unitName) 
+		throws IllegalArgumentException {
+	if (! isValidName(unitName))
+		throw new IllegalArgumentException();
+	this.unitName = unitName;
+}
+
+/**
+ * Variable registering the name of this unit.
+ */
+private String unitName;
+
+/* Attributes */
 /**
  * Return the weight of this unit.
  */
@@ -160,8 +317,9 @@ public int getWeight() {
  * @return 
  *       | result == maxWeight > weight >= (strength+agility)/2 
 */
+
 public boolean isValidWeight(int weight) {
-	return (weight >=(this.getStrength() + this.getAgility())/2 
+	return (weight >= minWeight 
 			&& weight <= maxWeight);
 }
 
@@ -176,14 +334,14 @@ public boolean isValidWeight(int weight) {
  *       | if (isValidWeight(weight))
  *       |   then new.getWeight() == weight
  *       | else
- *       |	 new.getWeight() == defaultWeight
+ *       |	 new.getWeight() == minWeight
  */
 @Raw
 public void setWeight(int weight) {
 	if (isValidWeight(weight))
 		this.weight = weight;
 	else 
-		this.weight = defaultWeight;
+		this.weight = minWeight;
 }
 
 /**
@@ -191,7 +349,7 @@ public void setWeight(int weight) {
  */
 private int weight;
 private static int maxWeight = 200;
-private int defaultWeight = (this.getStrength() + this.getAgility())/2;
+private int minWeight = (this.getStrength() + this.getAgility())/2;
 
 /**
  * Return the strength of this unit.
@@ -326,59 +484,7 @@ public void setToughness(int toughness) {
 private int toughness;
 private static int maxToughness = 200;
 
-
-/**
- * Return the name of this unit.
- */
-@Basic @Raw
-public String getName() {
-	return this.unitName;
-}
-
-/**
- * Check whether the given name is a valid name for
- * any unit.
- *  
- * @param  name
- *         The name to check.
- * @return 
- *       | result == Character.isUpperCase(name.charAt(0)) && name.length() >= 2 
-				&& name.matches("[a-zA-Z ']")
-*/
-public static boolean isValidName(String unitName) {
-	System.out.println("val = " + unitName);
-	return Character.isUpperCase(unitName.charAt(0)) && unitName.length() >= 2 
-			&& unitName.matches("[a-zA-Z ']+");
-}
-
-/**
- * Set the name of this unit to the given name.
- * 
- * @param  unitName
- *         The new name for this unit.
- * @post   The name of this new unit is equal to
- *         the given name.
- *       | new.getName() == unitName
- * @throws IllegalArgumentException
- *         The given name is not a valid name for any
- *         unit.
- *       | ! isValidName(getName())
- */
-@Raw
-public void setName(String unitName) 
-		throws IllegalArgumentException {
-	if (! isValidName(unitName))
-		throw new IllegalArgumentException();
-	this.unitName = unitName;
-}
-
-/**
- * Variable registering the name of this unit.
- */
-private String unitName;
-
-
-
+/* Points */
 /**
  * Return the stamina of this unit.
  */
@@ -419,6 +525,13 @@ public void setStamina(int stamina) {
 }
 
 /**
+ * Return the maximal stamina of this unit.
+ */
+public int getMaxStamina() {
+	return maxStamina;	
+}
+
+/**
  * Variable registering the stamina of this unit.
  */
 private int stamina;
@@ -439,10 +552,10 @@ public int getHitpoints() {
  * @param  hitpoints
  *         The hitpoints to check.
  * @return 
- *       | result == 0 < hitpoints <= maxHitpoints
+ *       | result == 0 < hitpoints <= getMaxHitpoints()
 */
 public boolean isValidHitpoints(int hitpoints) {
-	return ((0 < hitpoints) && (hitpoints <= maxHitpoints));
+	return ((0 < hitpoints) && (hitpoints <= this.getMaxHitpoints()));
 }
 
 /**
@@ -467,18 +580,42 @@ public void setHitpoints(int hitpoints) {
  * Variable registering the hitpoints of this Unit.
  */
 private int hitpoints;
-private int maxHitpoints = this.getWeight()*this.getToughness()/50;
-
-
-public void advanceTime(double timeLapse) throws IllegalArgumentException {
-	if (!isValidTimeLapse(timeLapse))
-		throw new IllegalArgumentException();
-	else
-		this.setTime(this.currentTime + timeLapse);
+public int getMaxHitpoints() {
+	int maxHitpoint = this.getWeight()*this.getToughness()/50;
+	if ((this.getWeight()*this.getToughness())%50 == 0)
+		return maxHitpoint;
+	return maxHitpoint+1;
 }
 
-public boolean isValidTimeLapse(double timeLapse) {
-	return ((0 < timeLapse) && (timeLapse < maxTimeLapse));
+/* Time */
+public void advanceTime(double tickTime) throws IllegalArgumentException {
+	if (!isValidTickTime(tickTime)){
+		System.out.println(tickTime);
+		throw new IllegalArgumentException();
+	}
+	else
+		this.setTime(this.currentTime + tickTime);
+		System.out.println(activeActivity);
+		if (getCurrentTime()-lastTimeRested >= 180){
+			activeActivity = "rest";
+			System.out.println("3 min zijn om");
+		}
+//		if (isUnderAttack()){
+//			activeActivity = "default";
+//			lastActivity = "default";
+//			doDefend();
+//		}
+		else if (isWorking())
+			doWork();
+//		else if (isAttacking())
+//			work();
+		else if (isResting()){
+			doRest();
+		}
+}
+
+public boolean isValidTickTime(double tickTime) {
+	return ((0 < tickTime) && (tickTime < maxTimeLapse));
 }
 
 public double getCurrentTime() {
@@ -490,37 +627,217 @@ public void setTime(double time) {
 }
 
 private double currentTime;
-private double maxTimeLapse;
+private double maxTimeLapse = 0.2;
+private String activeActivity;
+private String lastActivity;
+private double endTime;
+private double activityStartTime;
+private double lastTimeRested =0.2;
 
-// 	NOG NIET MET TEMPLATES
+/* Basic movement */
+
+/* Orientation */
+/**
+ * Return the orientation of this unit.
+ */
+@Basic @Raw
+public Float getOrientation() {
+	return this.orientation;
+}
+
+/**
+ * Check whether the given orientation is a valid orientation for
+ * any unit.
+ *  
+ * @param  orientation
+ *         The orientation to check.
+ * @return 
+ *       | result == 
+ *       // TODO Ik weet weer niet wat hier moet.
+*/
+public static boolean isValidOrientation(Float orientation) {
+	return false;
+}
+
+/**
+ * Set the orientation of this unit to the given orientation.
+ * 
+ * @param  orientation
+ *         The new orientation for this unit.
+ * @post   If the given orientation is a valid orientation for any unit,
+ *         the orientation of this new unit is equal to the given
+ *         orientation.
+ *       | if (isValidOrientation(orientation))
+ *       |   then new.getOrientation() == orientation
+ */
+@Raw
+public void setOrientation(float orientation) {
+	if (isValidOrientation(orientation))
+		this.orientation = orientation;
+}
+
+/**
+ * Variable registering the orientation of this unit.
+ */
+private float orientation;
 
 
-///**
-// * 
-// * @return unit's position
-// */
-//@Basic @Immutable
-//public double[] getPosition() {
-//	return this.position;
-//}
-//
-///**
-// * 
-// * @return block occupied by unit
-// */
-//@Basic @Immutable
-//public int[] getOccupiedBlock() {
-//	return this.occupiedBlock;
-//}
+/* Extended movement */
+
+/* Working */
+public void work(){
+	if (isValidActivity("work"))
+		this.activeActivity = "work";
+}
+
+public void doWork() {
+	// Waarom was hier al het tijdwerk in float gedaan?
+	if (!this.wasWorking()){
+		this.endTime = this.getCurrentTime() + (double)500/this.getStrength();
+		this.lastActivity = "work";
+	}
+	if (this.getCurrentTime() >= endTime)
+		this.lastActivity = "default";
+}
+
+public boolean isWorking() {
+	if (this.activeActivity == "work")
+		return true;
+	return false;
+}
+
+public boolean wasWorking() {
+	if (this.lastActivity == "work")
+		return true;
+	return false;
+}
+
+/* Attacking */
+public void attack(Unit unit) {
+	if ((this.getCube() == unit.getCube()) 
+			|| (this.getCube().isNeighbourBlock(unit.getCube())))
+		if (!this.isAttacking())
+			activityStartTime = (float)this.getCurrentTime();
+		this.activityStatus = "attack";
+		if ((float)this.getCurrentTime() >= activityStartTime + 1)
+			this.activityStatus = "default";
+		else 
+			unit.defenseAgainst(this);
+			unit.activityStatus = "defend";
+}
+
+public boolean isAttacking() {
+	if (this.activityStatus == "attack")
+		return true;
+	else
+		return false;
+}
+
+public boolean isUnderAttack() {
+	if (this.activeActivity == "defend")
+		return true;
+	else
+		return false;
+}
+
+public void defenseAgainst(Unit unit) {	
+	this.activityStatus = "defend";
+	// First step: try to dodge
+	double dodgeChance = 0.2*unit.getAgility()/this.getAgility();
+	double blockChance = 0.25*(unit.getStrength() + unit.getAgility())/
+			(this.getAgility() + this.getStrength());
+	if (Math.random() <= dodgeChance)
+		double xCoord = Vector.getXCoord(); // iets vinden om dat random te maken
+	else if (Math.random() <= blockChance)
+		// er gebeurt niets
+		this.defenseAgainst(unit);
+	else
+		this.setHitpoints(this.getHitpoints() - unit.getStrength()/10);
+}
+
+/* Resting */
+
+private double recoverdPoints = 0;
+
+/**
+ * Check whether the given activity is a valid activity for this unit.
+ * @param  activity
+ *         The activity to check.
+ * @return 
+ *       | result == 
+ *       // TODO Deze check aanvullen.
+*/
+private boolean isValidActivity(String activity){
+	System.out.println("go");
+	if (activity == "defending")
+		return true;
+	System.out.println("nog aan het pitten?");
+	if (this.isResting() && recoverdPoints<1)
+		return false;
+	
+	System.out.println("Heeft het geen zin?");
+	if (activity == "rest" && getCurrentTime()-lastTimeRested < 180 && 
+			hitpoints == getMaxHitpoints() && stamina == getMaxStamina())
+		return false;
+	System.out.println("alles ok");
+	return true;
+}
 
 
 
+/**
+ * Set the activity of this unit to resting.
+ * @post   The activity of this new unit is equal to
+ *         resting.
+ *       | new.isResting == True
+ * @throws IllegalArgumentException
+ *         Resting is not a valid activity for this unit.
+ *       | ! isValitActivity("rest")
+ */
+public void rest() throws IllegalArgumentException{
+	if (!isValidActivity("rest"))
+		throw new IllegalArgumentException();
+	this.activeActivity = "rest";
+	if (!wasResting()){
+		// Time starts so we can detect if the user changes his mind in 0.2 sec and wants to change
+		// (wish is not allowed)
+		activityStartTime = this.getCurrentTime();
+	}
+}
 
+public void doRest() {
+	if (!this.wasResting()){
+		System.out.println("begin te rusten");
+		activityStartTime = this.getCurrentTime();
+		recoverdPoints = 0;
+		this.lastActivity = "rest";
+	}
+	double oldRecoverdPoints = recoverdPoints;
+	recoverdPoints = (this.getCurrentTime()-activityStartTime)*this.getToughness()/200/0.2;
+	if (recoverdPoints>1){
+		lastTimeRested = getCurrentTime();
+		if (hitpoints != getMaxHitpoints())
+			hitpoints = hitpoints - (int) (oldRecoverdPoints) + (int) (recoverdPoints);
+		else if (stamina != getMaxStamina())
+			stamina = stamina - (int) (oldRecoverdPoints * 2) + (int) (recoverdPoints*2);
+		if (hitpoints == getMaxHitpoints() && stamina == getMaxStamina())
+			activeActivity = "default";
+	}
+}
 
+public boolean isResting() {
+	if (this.activeActivity == "rest")
+		return true;
+	else 
+		return false;
+}
 
-//public void rest() {
-//	if (this.hitpoints != this.getMaxHitpoints() && (!this.isUnderAttack()) )
-//		this.hitpoints = this.hitpoints + this.toughness/200;
-//	else if (this.stamina != this.getMaxStamina() && (!this.isUnderAttack()))
-//		this.stamina = this.stamina + this.toughness/100;
+public boolean wasResting() {
+	if (this.lastActivity == "rest")
+		return true;
+	else
+		return false;
+}
+
+/* Default behavior */
 }
