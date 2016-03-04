@@ -130,9 +130,9 @@ public Unit(String name, int[] initialPosition, int weight, int agility, int str
 	
 	try {
 		double[] coordinates = new double[3];
-		coordinates[0] = (double) initialPosition[0];
-		coordinates[1] = (double) initialPosition[1];
-		coordinates[2] = (double) initialPosition[2];
+		coordinates[0] = (double) initialPosition[0] + 0.5;
+		coordinates[1] = (double) initialPosition[1] + 0.5;
+		coordinates[2] = (double) initialPosition[2] + 0.5;
 		this.setPosition(coordinates);
 	} catch (IllegalPositionException e) {
 		// TODO Auto-generated catch block. EN GAAN WE DAN GEEN DEFAULT POSITIE SETTEN?
@@ -165,6 +165,16 @@ public Unit(String name, int[] initialPosition, int weight, int agility, int str
 }
 
 /* Position */
+/**
+ * Variable registering the position of this unit.
+ */
+private double[] position;
+
+/**
+ * Variable registering the cube of this Unit.
+ */
+private double[] cube;
+
 /**
  * Return the position of this unit.
  */
@@ -213,11 +223,6 @@ public void setPosition(double[] position)
 }
 
 /**
- * Variable registering the position of this unit.
- */
-private double[] position;
-
-/**
  * Return the Cube of this Unit.
  */
 @Basic @Raw
@@ -238,15 +243,22 @@ public int[] getCube() {
  * @return 
  *       | result == //TODO
 */
-public static boolean isValidCube(Cube Cube) {
-	return false;
+public static boolean isValidCube(double[] cube) {
+	for (double comp : cube){
+		if ((comp < 0) || (comp > cubesPerRib))
+			return false;
+	}
+	return true;
 }
 
-/**
- * Variable registering the cube of this Unit.
- */
-private Cube cube;
-
+private boolean isNeighbourBlock(int[] otherCube){
+	int[] thisCube = this.getCube();
+	for (int i = 0; i < 3; i++) {
+	    if (Math.abs(thisCube[i] - otherCube[i]) == 1)
+	    	return false;
+	}
+	return true;
+}
 
 /* Name */
 /**
@@ -596,20 +608,19 @@ public void advanceTime(double tickTime) throws IllegalArgumentException {
 	}
 	else
 		this.setTime(this.currentTime + tickTime);
-		System.out.println(activeActivity);
-		if (getCurrentTime()-lastTimeRested >= 180){
-			activeActivity = "rest";
-			System.out.println("3 min zijn om");
+		
+		if (isUnderAttack()){
+			activeActivity = null;
+			doDefend();
 		}
-//		if (isUnderAttack()){
-//			activeActivity = null;
-//			lastActivity = null;
-//			doDefend();
-//		}
+		else if (getCurrentTime()-lastTimeRested >= 180){
+		this.rest();
+		System.out.println("3 min zijn om");
+		}
 		else if (isWorking())
 			doWork();
-//		else if (isAttacking())
-//			work();
+		else if (isAttacking())
+			
 		else if (isResting()){
 			doRest();
 		}
@@ -708,20 +719,20 @@ public boolean isWorking() {
 
 /* Attacking */
 public void attack(Unit unit) {
-	if ((this.getCube() == unit.getCube()) 
-			|| (this.getCube().isNeighbourBlock(unit.getCube())))
-		if (!this.isAttacking())
+	if ((this.getCube() == unit.getCube()) || (this.isNeighbourBlock(unit.getCube())))
+		if (!this.isAttacking()){
 			activityStartTime = (float)this.getCurrentTime();
-		this.activityStatus = "attack";
+			this.activeActivity = "attack";
+		}
 		if ((float)this.getCurrentTime() >= activityStartTime + 1)
-			this.activityStatus = null;
+			this.activeActivity = null;
 		else 
 			unit.defenseAgainst(this);
-			unit.activityStatus = "defend";
+			unit.activeActivity = "defend";
 }
 
 public boolean isAttacking() {
-	if (this.activityStatus == "attack")
+	if (this.activeActivity == "attack")
 		return true;
 	else
 		return false;
@@ -735,12 +746,10 @@ public boolean isUnderAttack() {
 }
 
 public void defenseAgainst(Unit unit) {	
-	this.activityStatus = "defend";
-	// First step: try to dodge
-	double dodgeChance = 0.2*unit.getAgility()/this.getAgility();
+	this.activeActivity = "defend";
 	double blockChance = 0.25*(unit.getStrength() + unit.getAgility())/
 			(this.getAgility() + this.getStrength());
-	if (Math.random() <= dodgeChance)
+	if (Math.random() <=  0.2*unit.getAgility()/(double) this.getAgility())
 		double xCoord = Vector.getXCoord(); // iets vinden om dat random te maken
 	else if (Math.random() <= blockChance)
 		// er gebeurt niets
