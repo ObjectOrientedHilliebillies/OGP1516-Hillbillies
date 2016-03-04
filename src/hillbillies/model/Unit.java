@@ -587,6 +587,14 @@ public int getMaxHitpoints() {
 	return maxHitpoint+1;
 }
 
+/* Moving */
+
+public double getCurrentSpeed() {
+	return 3*(this.getStrength() + this.getAgility())/(4*this.getWeight());
+}
+
+
+
 /* Time */
 public void advanceTime(double tickTime) throws IllegalArgumentException {
 	if (!isValidTickTime(tickTime)){
@@ -615,7 +623,7 @@ public void advanceTime(double tickTime) throws IllegalArgumentException {
 }
 
 public boolean isValidTickTime(double tickTime) {
-	return ((0 < tickTime) && (tickTime < maxTimeLapse));
+	return ((0 < tickTime) && (tickTime <= maxTimeLapse));
 }
 
 public double getCurrentTime() {
