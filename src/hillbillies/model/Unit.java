@@ -1,6 +1,7 @@
 package hillbillies.model;
 
 import java.awt.Component;
+import java.lang.annotation.Target;
 import java.sql.Time;
 import java.util.Random;
 
@@ -9,7 +10,7 @@ import org.junit.experimental.theories.Theories;
 import be.kuleuven.cs.som.annotate.Basic;
 import be.kuleuven.cs.som.annotate.Immutable;
 import be.kuleuven.cs.som.annotate.Raw;
-
+import ogp.framework.util.ModelException;
 import ogp.framework.util.Util;
 
 // TODO Als de strength ofzo veranderd kan het zijn dat de unit zijn weight niet meer legaal is.
@@ -74,6 +75,7 @@ private static final int cubesPerRib = 50;
  *         The toughness for this new unit.  
  * @param  enableDefaultBehavior
  *         Enables default behavior for this new unit.
+ * @throws ModelException 
  * @pre    The maximal hitpoints must be a valid hitpoints for any Unit.
  *       | isValidHitpoints(this.getMaxHitpoints)
  * @pre    The given stamina must be a valid stamina for any unit.
@@ -122,7 +124,7 @@ private static final int cubesPerRib = 50;
  */
 public Unit(String name, int[] initialPosition, int weight, int agility, int strength, int toughness,
 		boolean enableDefaultBehavior)
-		throws IllegalArgumentException {
+		throws IllegalArgumentException, ModelException {
 	/*  given enableDefaultBehavior, maximal hitpoints,
 	 *  maximal stamina,
 	 */
@@ -160,6 +162,12 @@ public Unit(String name, int[] initialPosition, int weight, int agility, int str
 	setHitpoints(getMaxHitpoints()-30);
 	setStamina(getMaxStamina()-30);
 	
+	try {
+		this.setCube(initialPosition);
+	} catch (IllegalPositionException e) {
+		throw new ModelException();
+	}
+	
 	this.orientation = (float) (Math.PI/2);
 	
 }
@@ -173,7 +181,15 @@ private double[] position;
 /**
  * Variable registering the cube of this Unit.
  */
-private double[] cube;
+private int[] cube;
+
+/**
+ * Variable registering the target cube of this Unit.
+ */
+private int[] targetCube;
+
+private double[] targetPosition;
+
 
 /**
  * Return the position of this unit.
@@ -222,16 +238,22 @@ public void setPosition(double[] position)
 	this.position = position;
 }
 
+public double[] getTargetPosition() {
+	return this.targetPosition;
+}
+
+public void setTargetPosition(double[] targetPosition) throws IllegalPositionException {
+	if (! isValidPosition(targetPosition))
+		throw new IllegalPositionException();
+	this.targetPosition = targetPosition;
+}
+
 /**
- * Return the Cube of this Unit.
+ * Return the cube of this unit.
  */
 @Basic @Raw
 public int[] getCube() {
-	int[] cubeArray = new int[3];
-	cubeArray[0] = (int) position[0];
-	cubeArray[1] = (int) position[1];
-	cubeArray[2] = (int) position[2];
-	return cubeArray;
+	return this.cube;
 }
 
 /**
@@ -243,7 +265,7 @@ public int[] getCube() {
  * @return 
  *       | result == //TODO
 */
-public static boolean isValidCube(double[] cube) {
+public static boolean isValidCube(int[] cube) {
 	for (double comp : cube){
 		if ((comp < 0) || (comp > cubesPerRib))
 			return false;
@@ -251,10 +273,85 @@ public static boolean isValidCube(double[] cube) {
 	return true;
 }
 
-private boolean isNeighbourBlock(int[] otherCube){
-	int[] thisCube = this.getCube();
+/**
+ * Set the cube of this unit to the given cube.
+ * 
+ * @param  cube
+ *         The new cube for this unit.
+ * @post   The cube of this new unit is equal to
+ *         the given cube.
+ *       | new.getPosition() == cube
+ * @throws IllegalPositionException
+ *         The given cube is not a valid position for any
+ *         unit.
+ *       | ! isValidPosition(getCube())
+ */
+@Raw
+public void setCube(int[] cube) 
+		throws IllegalPositionException {
+	if (! isValidCube(cube))
+		throw new IllegalPositionException();
+	this.cube = cube;
+}
+
+/**
+ * Set the cube of this unit to the given cube.
+ * 
+ * @param  position
+ *         The new position for this unit.
+ * @post   The cube of this new unit is cube occupied
+ *         by the given position.
+ *       | new.getPosition() == position
+ * @throws IllegalPositionException
+ *         The given position is not a valid position for any
+ *         unit.
+ *       | ! isValidPosition(getPosition())
+ */
+@Raw
+public void setCube(double[] position)
+		throws IllegalPositionException{
+	if (!isValidPosition(position))
+		throw new IllegalPositionException();
+	int[] cubeArray = new int[3];
+	cubeArray[0] = (int) position[0];
+	cubeArray[1] = (int) position[1];
+	cubeArray[2] = (int) position[2];
+	this.cube = cubeArray;
+}
+
+/**
+ * Return the cube of this unit.
+ */
+@Basic @Raw
+public int[] getTargetCube() {
+	return this.targetCube;
+}
+
+/**
+ * Set the cube of this unit to the given cube.
+ * 
+ * @param  cube
+ *         The new cube for this unit.
+ * @post   The cube of this new unit is equal to
+ *         the given cube.
+ *       | new.getPosition() == cube
+ * @throws IllegalPositionException
+ *         The given cube is not a valid position for any
+ *         unit.
+ *       | ! isValidPosition(getCube())
+ */
+@Raw
+public void setTargetCube(int[] cube) 
+		throws IllegalPositionException {
+	if (! isValidCube(cube))
+		throw new IllegalPositionException();
+	this.targetCube = cube;
+}
+
+// TODO als de andere cube niet tot de wereld behoord is het misschien ook geen NeighbourCube?
+private boolean isNeighbourCube(int[] otherCube){
 	for (int i = 0; i < 3; i++) {
-	    if (Math.abs(thisCube[i] - otherCube[i]) == 1)
+	    if (Math.abs(this.getCube()[i] - otherCube[i]) != 1)
 	    	return false;
 	}
 	return true;
@@ -608,21 +705,22 @@ public void advanceTime(double tickTime) throws IllegalArgumentException {
 	}
 	else
 		this.setTime(this.currentTime + tickTime);
-		
-		if (isUnderAttack()){
-			activeActivity = null;
-			doDefend();
-		}
-		else if (getCurrentTime()-lastTimeRested >= 180){
-		this.rest();
-		System.out.println("3 min zijn om");
+		if (getCurrentTime()-lastTimeRested >= 180){
+			this.rest();
+			System.out.println("3 min zijn om");
 		}
 		else if (isWorking())
 			doWork();
-		else if (isAttacking())
-			
 		else if (isResting()){
 			doRest();
+		}
+		else if (this.isMoving()){
+			try {
+				doMove(tickTime, this.getWalkingSpeed());
+			} catch (IllegalPositionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 }
 
@@ -646,6 +744,82 @@ private double activityStartTime;
 private double lastTimeRested =0.2;
 
 /* Basic movement */
+/**
+ * Variable registering the base speed of this unit.
+ */
+private double baseSpeed;
+
+private double walkingSpeed;
+
+/**
+ * Return the base speed of this unit.
+ */
+@Basic @Raw
+public double getBaseSpeed() {
+	return this.baseSpeed;
+}
+
+public void setBaseSpeed(){
+	this.baseSpeed = 3*(this.getStrength() + this.getAgility())/(double) (4*this.getWeight());
+}
+
+public double getWalkingSpeed() {
+	return this.walkingSpeed;
+}
+
+public void setWalkingSpeed(double[] targetPosition) {
+	double zDifference = (this.getPosition()[2] - targetPosition[2]);
+	if (zDifference == -1)
+		this.walkingSpeed = this.getBaseSpeed()/2;
+	else if (zDifference == 1)
+		this.walkingSpeed = this.getBaseSpeed()*1.2;
+	else{
+		this.walkingSpeed = this.getBaseSpeed();
+	}
+}
+
+public void moveToAdjacent(int dx, int dy, int dz)
+		throws IllegalArgumentException, IllegalPositionException{
+	double[] targetPosition = new double[3];
+	targetPosition[0] = this.getCube()[0] + dx + .5;
+	targetPosition[1] = this.getCube()[1] + dy + .5;
+	targetPosition[2] = this.getCube()[2] + dz + .5;
+	if (!isValidActivity("move") || !isValidPosition(targetPosition))
+		throw new IllegalArgumentException();
+	if (activeActivity != "move"){
+		activeActivity = "move";
+		this.setTargetPosition(targetPosition);
+		this.setBaseSpeed();
+		this.setWalkingSpeed(targetPosition);
+		System.out.println(targetPosition);
+	}
+}
+
+public void doMove(double tickTime, double speed) throws IllegalPositionException {
+	double d = Math.sqrt(Math.pow(this.getTargetPosition()[0]-this.getPosition()[0],2)
+						+Math.pow(this.getTargetPosition()[1]-this.getPosition()[1],2)
+						+Math.pow(this.getTargetPosition()[2]-this.getPosition()[2],2));
+	double totalDistance = tickTime*speed/d;
+	double[] newPosition = new double[3];
+	newPosition[0] = this.getPosition()[0]
+			+(totalDistance*(this.getTargetPosition()[0]-this.getPosition()[0]));
+	newPosition[1] = this.getPosition()[1]
+			+(totalDistance*(this.getTargetPosition()[1]-this.getPosition()[1]));
+	newPosition[2] = this.getPosition()[2]
+			+(totalDistance*(this.getTargetPosition()[2]-this.getPosition()[2]));
+	this.setPosition(newPosition);
+	if (Util.fuzzyEquals(this.getPosition()[0], this.getTargetPosition()[0])
+			&&Util.fuzzyEquals(this.getPosition()[1], this.getTargetPosition()[1])
+					&&Util.fuzzyEquals(this.getPosition()[1], this.getTargetPosition()[1]));
+
+	
+}
+
+public boolean isMoving(){
+	if (activeActivity == "move")
+		return true;
+	return false;
+}
 
 /* Orientation */
 /**

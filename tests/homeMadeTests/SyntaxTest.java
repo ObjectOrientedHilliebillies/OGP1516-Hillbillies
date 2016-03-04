@@ -8,8 +8,8 @@ public class SyntaxTest {
 	public final void test(){
 		
 	double a = 0.499999;
-	double b = 0.6;
+	int b = 2;
 	
-    System.out.println(Util.fuzzyGreaterThanOrEqualTo(a, b));
+    System.out.println(a+b);
 	}
 }

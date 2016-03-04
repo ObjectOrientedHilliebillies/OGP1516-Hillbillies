@@ -1,5 +1,6 @@
 package hillbillies.part1.facade;
 
+import hillbillies.model.IllegalPositionException;
 import hillbillies.model.Unit;
 import ogp.framework.util.ModelException;
 
@@ -103,20 +104,25 @@ public class Facade implements IFacade {
 
 	@Override
 	public void moveToAdjacent(Unit unit, int dx, int dy, int dz) throws ModelException {
-		// TODO Auto-generated method stub
-		
+	
+		try {
+			unit.moveToAdjacent(dx, dy, dz);
+		} catch (IllegalArgumentException e) {
+			throw new ModelException();
+		} catch (IllegalPositionException e) {
+			throw new ModelException();
+		}
 	}
 
 	@Override
 	public double getCurrentSpeed(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
-		return 0;
+		return unit.getWalkingSpeed();
+		// TODO nog niet finaal
 	}
 
 	@Override
 	public boolean isMoving(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
-		return false;
+		return unit.isMoving();
 	}
 
 	@Override
