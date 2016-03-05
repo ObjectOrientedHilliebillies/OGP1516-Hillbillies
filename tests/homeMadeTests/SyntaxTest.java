@@ -1,15 +1,20 @@
 package homeMadeTests;
 
+import java.util.Arrays;
+
 import org.junit.Test;
 import ogp.framework.util.Util;
 
 public class SyntaxTest {
 	@Test
 	public final void test(){
+		String a;
+		String b;
 		
-	double a = 0.499999;
-	int b = 2;
-	
-    System.out.println(a+b);
-	}
+		a = "a";
+		b = a;
+		a = "x";
+		
+		System.out.println(b);
+}
 }
