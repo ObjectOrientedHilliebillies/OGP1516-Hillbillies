@@ -13,7 +13,11 @@ import be.kuleuven.cs.som.annotate.Raw;
 import ogp.framework.util.ModelException;
 import ogp.framework.util.Util;
 
-// TODO Als de strength ofzo veranderd kan het zijn dat de unit zijn weight niet meer legaal is.
+// FIXME Als de strength ofzo veranderd kan het zijn dat de unit zijn weight niet meer legaal is.
+// FIXME De speed is nog niet juist
+// FIXME Er zijn bugs als je meerder units hebt
+// FIXME Als je omhoog gaat veranderd alles in Nan !?
+
 
 /**
  * @invar  The position of each unit must be a valid position for any
@@ -137,7 +141,7 @@ public Unit(String name, int[] initialPosition, int weight, int agility, int str
 		coordinates[2] = (double) initialPosition[2] + 0.5;
 		this.setPosition(coordinates);
 	} catch (IllegalPositionException e) {
-		// TODO Auto-generated catch block. EN GAAN WE DAN GEEN DEFAULT POSITIE SETTEN?
+		// FIXME Auto-generated catch block. EN GAAN WE DAN GEEN DEFAULT POSITIE SETTEN?
 		e.printStackTrace();
 	}
 	
@@ -162,14 +166,7 @@ public Unit(String name, int[] initialPosition, int weight, int agility, int str
 	setHitpoints(getMaxHitpoints()-30);
 	setStamina(getMaxStamina()-30);
 	
-	try {
-		this.setCube(initialPosition);
-	} catch (IllegalPositionException e) {
-		throw new ModelException();
-	}
-	
-	this.orientation = (float) (Math.PI/2);
-	
+	this.orientation = (Math.PI/2);
 }
 
 /* Position */
@@ -207,7 +204,7 @@ public double[] getPosition() {
  *         The position to check.
  * @return 
  *       | result == 
- *       // TODO Deze check aanvullen.
+ *       // FIXME Deze check aanvullen.
 */
 public static boolean isValidPosition(double[] position) {
 	for (double comp : position){
@@ -253,7 +250,14 @@ public void setTargetPosition(double[] targetPosition) throws IllegalPositionExc
  */
 @Basic @Raw
 public int[] getCube() {
-	return this.cube;
+	int[] cubeArray = new int[3];
+	for (int i=0 ; i !=3 ; i++){
+		cubeArray[i] = (int) position[i];
+	}
+	return cubeArray;
+	
+	// FIXME oud vs new nog eens vergelijken
+//	return this.cube;
 }
 
 /**
@@ -263,7 +267,7 @@ public int[] getCube() {
  * @param  Cube
  *         The Cube to check.
  * @return 
- *       | result == //TODO
+ *       | result == //FIXME
 */
 public static boolean isValidCube(int[] cube) {
 	for (double comp : cube){
@@ -273,51 +277,52 @@ public static boolean isValidCube(int[] cube) {
 	return true;
 }
 
-/**
- * Set the cube of this unit to the given cube.
- * 
- * @param  cube
- *         The new cube for this unit.
- * @post   The cube of this new unit is equal to
- *         the given cube.
- *       | new.getPosition() == cube
- * @throws IllegalPositionException
- *         The given cube is not a valid position for any
- *         unit.
- *       | ! isValidPosition(getCube())
- */
-@Raw
-public void setCube(int[] cube) 
-		throws IllegalPositionException {
-	if (! isValidCube(cube))
-		throw new IllegalPositionException();
-	this.cube = cube;
-}
-
-/**
- * Set the cube of this unit to the given cube.
- * 
- * @param  position
- *         The new position for this unit.
- * @post   The cube of this new unit is cube occupied
- *         by the given position.
- *       | new.getPosition() == position
- * @throws IllegalPositionException
- *         The given position is not a valid position for any
- *         unit.
- *       | ! isValidPosition(getPosition())
- */
-@Raw
-public void setCube(double[] position)
-		throws IllegalPositionException{
-	if (!isValidPosition(position))
-		throw new IllegalPositionException();
-	int[] cubeArray = new int[3];
-	cubeArray[0] = (int) position[0];
-	cubeArray[1] = (int) position[1];
-	cubeArray[2] = (int) position[2];
-	this.cube = cubeArray;
-}
+//
+///**
+// * Set the cube of this unit to the given cube.
+// * 
+// * @param  cube
+// *         The new cube for this unit.
+// * @post   The cube of this new unit is equal to
+// *         the given cube.
+// *       | new.getPosition() == cube
+// * @throws IllegalPositionException
+// *         The given cube is not a valid position for any
+// *         unit.
+// *       | ! isValidPosition(getCube())
+// */
+//@Raw
+//public void setCube(int[] cube) 
+//		throws IllegalPositionException {
+//	if (! isValidCube(cube))
+//		throw new IllegalPositionException();
+//	this.cube = cube;
+//}
+//
+///**
+// * Set the cube of this unit to the given cube.
+// * 
+// * @param  position
+// *         The new position for this unit.
+// * @post   The cube of this new unit is cube occupied
+// *         by the given position.
+// *       | new.getPosition() == position
+// * @throws IllegalPositionException
+// *         The given position is not a valid position for any
+// *         unit.
+// *       | ! isValidPosition(getPosition())
+// */
+//@Raw
+//public void setCube(double[] position)
+//		throws IllegalPositionException{
+//	if (!isValidPosition(position))
+//		throw new IllegalPositionException();
+//	int[] cubeArray = new int[3];
+//	cubeArray[0] = (int) position[0];
+//	cubeArray[1] = (int) position[1];
+//	cubeArray[2] = (int) position[2];
+//	this.cube = cubeArray;
+//}
 
 /**
  * Return the cube of this unit.
@@ -348,9 +353,9 @@ public void setTargetCube(int[] cube)
 	this.targetCube = cube;
 }
 
-// TODO als de andere cube niet tot de wereld behoord is het misschien ook geen NeighbourCube?
+// FIXME als de andere cube niet tot de wereld behoord is het misschien ook geen NeighbourCube?
 private boolean isNeighbourCube(int[] otherCube){
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i != 3; i++) {
 	    if (Math.abs(this.getCube()[i] - otherCube[i]) != 1)
 	    	return false;
 	}
@@ -703,9 +708,10 @@ public void advanceTime(double tickTime) throws IllegalArgumentException {
 		System.out.println(tickTime);
 		throw new IllegalArgumentException();
 	}
-	else
+	else{
+		System.out.println(unitName + activeActivity);
 		this.setTime(this.currentTime + tickTime);
-		if (getCurrentTime()-lastTimeRested >= 180){
+		if (getCurrentTime()-lastTimeRested >= 180 && this.activeActivity != "move"){
 			this.rest();
 			System.out.println("3 min zijn om");
 		}
@@ -716,11 +722,12 @@ public void advanceTime(double tickTime) throws IllegalArgumentException {
 		}
 		else if (this.isMoving()){
 			try {
-				doMove(tickTime, this.getWalkingSpeed());
+				doMove(tickTime, this.getSpeed());
 			} catch (IllegalPositionException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		}
 		}
 }
 
@@ -767,7 +774,17 @@ public double getWalkingSpeed() {
 	return this.walkingSpeed;
 }
 
+public double getSpeed(){
+	if (this.activeActivity == "move")
+		return this.walkingSpeed;
+	return 0;
+}
+
 public void setWalkingSpeed(double[] targetPosition) {
+	if (activeActivity != "move"){
+		this.walkingSpeed = 0;
+	}
+	else{
 	double zDifference = (this.getPosition()[2] - targetPosition[2]);
 	if (zDifference == -1)
 		this.walkingSpeed = this.getBaseSpeed()/2;
@@ -775,6 +792,7 @@ public void setWalkingSpeed(double[] targetPosition) {
 		this.walkingSpeed = this.getBaseSpeed()*1.2;
 	else{
 		this.walkingSpeed = this.getBaseSpeed();
+	}
 	}
 }
 
@@ -799,20 +817,26 @@ public void doMove(double tickTime, double speed) throws IllegalPositionExceptio
 	double d = Math.sqrt(Math.pow(this.getTargetPosition()[0]-this.getPosition()[0],2)
 						+Math.pow(this.getTargetPosition()[1]-this.getPosition()[1],2)
 						+Math.pow(this.getTargetPosition()[2]-this.getPosition()[2],2));
-	double totalDistance = tickTime*speed/d;
-	double[] newPosition = new double[3];
-	newPosition[0] = this.getPosition()[0]
-			+(totalDistance*(this.getTargetPosition()[0]-this.getPosition()[0]));
-	newPosition[1] = this.getPosition()[1]
-			+(totalDistance*(this.getTargetPosition()[1]-this.getPosition()[1]));
-	newPosition[2] = this.getPosition()[2]
-			+(totalDistance*(this.getTargetPosition()[2]-this.getPosition()[2]));
-	this.setPosition(newPosition);
-	if (Util.fuzzyEquals(this.getPosition()[0], this.getTargetPosition()[0])
-			&&Util.fuzzyEquals(this.getPosition()[1], this.getTargetPosition()[1])
-					&&Util.fuzzyEquals(this.getPosition()[1], this.getTargetPosition()[1]));
-
 	
+	double movingDistance = tickTime*speed/d;
+	if (Util.fuzzyGreaterThanOrEqualTo(movingDistance, 1)){
+		this.setPosition(this.targetPosition);
+		this.activeActivity = null;
+	}
+	else{
+	double[] newPosition = new double[3];
+	for (int i=0; i != 3; i++){
+		newPosition[i] = this.getPosition()[i]
+				+(movingDistance*(this.getTargetPosition()[i]-this.getPosition()[i]));
+	}	
+	if (!Util.fuzzyEquals(this.getTargetPosition()[1], this.getPosition()[1])
+			|| !Util.fuzzyEquals(this.getTargetPosition()[0], this.getPosition()[0])){
+	this.orientation = Math.atan2(this.getTargetPosition()[1]-this.getPosition()[1], 
+			this.getTargetPosition()[0]-this.getPosition()[0]);
+	}
+	this.setPosition(newPosition);
+	
+	}
 }
 
 public boolean isMoving(){
@@ -826,45 +850,14 @@ public boolean isMoving(){
  * Return the orientation of this unit.
  */
 @Basic @Raw
-public Float getOrientation() {
+public double getOrientation() {
 	return this.orientation;
-}
-
-/**
- * Check whether the given orientation is a valid orientation for
- * any unit.
- *  
- * @param  orientation
- *         The orientation to check.
- * @return 
- *       | result == 
- *       // TODO Ik weet weer niet wat hier moet.
-*/
-public static boolean isValidOrientation(Float orientation) {
-	return false;
-}
-
-/**
- * Set the orientation of this unit to the given orientation.
- * 
- * @param  orientation
- *         The new orientation for this unit.
- * @post   If the given orientation is a valid orientation for any unit,
- *         the orientation of this new unit is equal to the given
- *         orientation.
- *       | if (isValidOrientation(orientation))
- *       |   then new.getOrientation() == orientation
- */
-@Raw
-public void setOrientation(float orientation) {
-	if (isValidOrientation(orientation))
-		this.orientation = orientation;
 }
 
 /**
  * Variable registering the orientation of this unit.
  */
-private float orientation;
+private double orientation;
 
 
 /* Extended movement */
@@ -880,7 +873,6 @@ public void work(){
 }
 
 public void doWork() {
-	// Waarom was hier al het tijdwerk in float gedaan?
 	if (Util.fuzzyGreaterThanOrEqualTo(this.getCurrentTime(), endTime))
 		this.activeActivity = null;
 }
@@ -893,12 +885,12 @@ public boolean isWorking() {
 
 /* Attacking */
 public void attack(Unit unit) {
-	if ((this.getCube() == unit.getCube()) || (this.isNeighbourBlock(unit.getCube())))
+	if ((this.getCube() == unit.getCube()) || (this.isNeighbourCube(unit.getCube())))
 		if (!this.isAttacking()){
-			activityStartTime = (float)this.getCurrentTime();
+			this.activityStartTime = this.getCurrentTime();
 			this.activeActivity = "attack";
 		}
-		if ((float)this.getCurrentTime() >= activityStartTime + 1)
+		if (this.getCurrentTime() >= activityStartTime + 1)
 			this.activeActivity = null;
 		else 
 			unit.defenseAgainst(this);
@@ -942,10 +934,12 @@ private double recoverdPoints;
  *         The activity to check.
  * @return 
  *       | result == !(this.isResting() && recoverdPoints<1)
- *       // TODO Deze check aanvullen.
+ *       // FIXME Deze check aanvullen.
 */
 private boolean isValidActivity(String activity){
 	if (this.isResting() && recoverdPoints<1)
+		return false;
+	if (this.activeActivity == "move")
 		return false;
 	return true;
 }

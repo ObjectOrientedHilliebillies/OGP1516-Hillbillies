@@ -116,7 +116,7 @@ public class Facade implements IFacade {
 
 	@Override
 	public double getCurrentSpeed(Unit unit) throws ModelException {
-		return unit.getWalkingSpeed();
+		return unit.getSpeed();
 		// TODO nog niet finaal
 	}
 
@@ -145,8 +145,7 @@ public class Facade implements IFacade {
 
 	@Override
 	public double getOrientation(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
-		return 0;
+		return unit.getOrientation();
 	}
 
 	@Override

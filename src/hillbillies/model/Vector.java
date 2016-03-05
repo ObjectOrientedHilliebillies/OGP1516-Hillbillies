@@ -36,7 +36,6 @@ public class Vector {
 		return vectorArray;
 	}
 	
-	// TODO Ik weet niet of dit helemaal mag.
 	public Cube getCube(){
 		return new Cube(this);
 	}
