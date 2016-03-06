@@ -109,7 +109,6 @@ public class Facade implements IFacade {
 	@Override
 	public double getCurrentSpeed(Unit unit) throws ModelException {
 		return unit.getSpeed();
-		// TODO nog niet finaal
 	}
 
 	@Override
@@ -119,20 +118,18 @@ public class Facade implements IFacade {
 
 	@Override
 	public void startSprinting(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
+		unit.startSprinting();
 		
 	}
 
 	@Override
 	public void stopSprinting(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
-		
+		unit.stopSprinting();		
 	}
 
 	@Override
 	public boolean isSprinting(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
-		return false;
+		return unit.isSprinting();
 	}
 
 	@Override

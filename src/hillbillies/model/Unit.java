@@ -1,9 +1,6 @@
 package hillbillies.model;
 
-import java.nio.file.SecureDirectoryStream;
 import java.util.Arrays;
-
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane.SystemMenuBar;
 
 import be.kuleuven.cs.som.annotate.Basic;
 import be.kuleuven.cs.som.annotate.Raw;
@@ -11,10 +8,11 @@ import ogp.framework.util.ModelException;
 import ogp.framework.util.Util;
 
 // FIXME Als de strength ofzo veranderd kan het zijn dat de unit zijn weight niet meer legaal is.
-// FIXME De speed is nog niet juist
 // FIXME Er zijn bugs als je meerder units hebt
 // FIXME Als je omhoog gaat veranderd alles in Nan !?
 // FIXME Na 3 min gameTime crashed het
+// FIXME MoveTo start niet zo gemakkelijk.
+// TODO Defence is nog niet echt getest
 
 
 /**
@@ -173,11 +171,6 @@ public Unit(String name, int[] initialPosition, int weight, int agility, int str
  * Variable registering the position of this unit.
  */
 private double[] position;
-
-/**
- * Variable registering the cube of this Unit.
- */
-private int[] cube;
 
 /**
  * Variable registering the target cube of this Unit.
@@ -713,36 +706,27 @@ public void advanceTime(double tickTime) throws IllegalArgumentException, ModelE
 		throw new IllegalArgumentException();
 	}
 	else{
-		System.out.println(activeActivity);
 		this.setTime(this.currentTime + tickTime);
-		if (getCurrentTime()-lastTimeRested >= 180 && this.isValidActivity("rest")){
+	if (getCurrentTime()-lastTimeRested >= 180 && this.isValidActivity("rest")){
 			this.rest();
 			System.out.println("3 min zijn om");
 		}
-	else if (this.activeActivity == null && (this.targetCube != null) && 
+		
+	if (this.activeActivity == null && (this.targetCube != null) && 
 				!Arrays.equals(this.getCube(), this.targetCube)){
-		System.out.println(Arrays.toString(this.getCube()));
-		System.out.println(Arrays.toString(this.targetCube));
-		System.out.println(Arrays.equals(this.getCube() , this.targetCube));
 		doMoveTo();
 	}
-			
-		else if (isWorking())
-			doWork();
-		else if (isResting()){
-			doRest();
-		}
-		else if (this.isMoving()){
-			try {
-				doMove(tickTime, this.getSpeed());
-			} catch (ModelException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		else if (this.isAttacking())
-			this.doAttack();
-		}
+	if (isWorking())
+		doWork();
+	else if (isResting())
+		doRest();
+	else if (this.isAttacking())
+		this.doAttack();
+	else if (this.isMoving())
+		doMove(tickTime);
+	else 
+		this.speed=0;
+	}
 }
 
 public boolean isValidTickTime(double tickTime) {
@@ -782,7 +766,9 @@ private double lastTimeRested =0.2;
  */
 private double baseSpeed;
 
-private double walkingSpeed;
+private double speed;
+
+private boolean sprinting;
 
 /**
  * Return the base speed of this unit.
@@ -796,29 +782,39 @@ public void setBaseSpeed(){
 	this.baseSpeed = 3*(this.getStrength() + this.getAgility())/(double) (4*this.getWeight());
 }
 
-public double getWalkingSpeed() {
-	return this.walkingSpeed;
+public double getSpeed() {
+	return this.speed;
 }
 
-public double getSpeed(){
-	if (this.activeActivity == "move")
-		return this.walkingSpeed;
-	return 0;
+public void startSprinting(){
+	if (this.stamina > 0 && (this.activeActivity == "move" || this.targetCube != null))
+			this.sprinting = true;
 }
 
-public void setWalkingSpeed(double[] targetPosition) {
+public void stopSprinting(){
+	this.sprinting = false;
+}
+
+public boolean isSprinting() {
+		return this.sprinting;
+}
+
+public void setSpeed(double[] targetPosition) {
 	if (activeActivity != "move"){
-		this.walkingSpeed = 0;
+		this.speed = 0;
 	}
 	else{
-	double zDifference = (this.getPosition()[2] - targetPosition[2]);
-	if (zDifference == -1)
-		this.walkingSpeed = this.getBaseSpeed()/2;
-	else if (zDifference == 1)
-		this.walkingSpeed = this.getBaseSpeed()*1.2;
-	else{
-		this.walkingSpeed = this.getBaseSpeed();
-	}
+		System.out.println(this.isSprinting());
+		double zDifference = (this.getPosition()[2] - targetPosition[2]);
+		if (zDifference == -1)
+			this.speed = this.getBaseSpeed()/2;
+		else if (zDifference == 1)
+			this.speed = this.getBaseSpeed()*1.2;
+		else{
+			this.speed = this.getBaseSpeed();
+		}
+		if (this.sprinting)
+			this.speed = this.speed * 2;
 	}
 }
 
@@ -836,14 +832,21 @@ public void moveToAdjacent(int dx, int dy, int dz)
 		activeActivity = "move";
 		this.setTargetPosition(targetPosition);
 		this.setBaseSpeed();
-		this.setWalkingSpeed(targetPosition);
 	}
-	System.out.println("dees dan toch");
-	System.out.println(this.targetPosition);
 }
 
-public void doMove(double tickTime, double speed) throws ModelException {
-	System.out.println(this.getTargetPosition());
+private double exhaustedPoints;
+
+public void doMove(double tickTime) throws ModelException {
+	if (sprinting){
+		double oldExhaustedPoints = exhaustedPoints;
+		exhaustedPoints = exhaustedPoints + tickTime/0.1;
+		stamina = stamina + (int) (oldExhaustedPoints) - (int) (exhaustedPoints);
+		if (stamina <= 0)
+			this.sprinting = false;
+	}
+	
+	this.setSpeed(this.targetPosition);
 	double d = Math.sqrt(Math.pow(this.getTargetPosition()[0]-this.getPosition()[0],2)
 						+Math.pow(this.getTargetPosition()[1]-this.getPosition()[1],2)
 						+Math.pow(this.getTargetPosition()[2]-this.getPosition()[2],2));
@@ -851,6 +854,13 @@ public void doMove(double tickTime, double speed) throws ModelException {
 	double movingDistance = tickTime*speed/d;
 	if (Util.fuzzyGreaterThanOrEqualTo(movingDistance, 1)){
 		this.setPosition(this.targetPosition);
+		if (Arrays.equals(this.getCube(), this.targetCube)){
+			System.out.println("targetCube op null zetten");
+			this.sprinting = false;
+			this.targetCube = null;
+			this.exhaustedPoints = 0;
+		}
+			
 		this.startNextActivity();
 	}
 	else{
@@ -906,7 +916,6 @@ public void moveTo(int[] cube) throws ModelException{
 public void doMoveTo() throws IllegalArgumentException, ModelException{
 	
 	int[] difference = new int[3];
-	System.out.println("before crash");
 	for (int i=0; i != 3; i++){
 		if (this.getCube()[i] == this.getTargetCube()[i])
 			difference[i] = 0;
@@ -917,7 +926,6 @@ public void doMoveTo() throws IllegalArgumentException, ModelException{
 		
 		}
 	}
-	System.out.println("starting move to adjacent");
 	this.moveToAdjacent(difference[0], difference[1], difference[2]);
 	
 }
@@ -1024,7 +1032,7 @@ private double recoverdPoints;
  *       | result == !(this.isResting() && recoverdPoints<1)
  *       // FIXME Deze check aanvullen.
 */
-private boolean isValidActivity(String activity){
+public boolean isValidActivity(String activity){
 	if (this.isResting() && recoverdPoints<1)
 		return false;
 	if (this.activeActivity == "move")
@@ -1055,7 +1063,7 @@ public void rest() throws IllegalArgumentException{
 	}
 }
 
-private void doRest() {
+public void doRest() {
 	double oldRecoverdPoints = recoverdPoints;
 	recoverdPoints = (this.getCurrentTime()-activityStartTime)*this.getToughness()/200/0.2;
 	if (Util.fuzzyGreaterThanOrEqualTo(recoverdPoints,1)){
