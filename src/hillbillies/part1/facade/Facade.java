@@ -103,50 +103,43 @@ public class Facade implements IFacade {
 
 	@Override
 	public void moveToAdjacent(Unit unit, int dx, int dy, int dz) throws ModelException {
-		// TODO Auto-generated method stub
-		
+			unit.moveToAdjacent(dx, dy, dz);
 	}
 
 	@Override
 	public double getCurrentSpeed(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
-		return 0;
+		return unit.getSpeed();
 	}
 
 	@Override
 	public boolean isMoving(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
-		return false;
+		return unit.isMoving();
 	}
 
 	@Override
 	public void startSprinting(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
+		unit.startSprinting();
 		
 	}
 
 	@Override
 	public void stopSprinting(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
-		
+		unit.stopSprinting();		
 	}
 
 	@Override
 	public boolean isSprinting(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
-		return false;
+		return unit.isSprinting();
 	}
 
 	@Override
 	public double getOrientation(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
-		return 0;
+		return unit.getOrientation();
 	}
 
 	@Override
 	public void moveTo(Unit unit, int[] cube) throws ModelException {
-		// TODO Auto-generated method stub
-		
+		unit.moveTo(cube);		
 	}
 
 	@Override
@@ -161,14 +154,12 @@ public class Facade implements IFacade {
 
 	@Override
 	public void fight(Unit attacker, Unit defender) throws ModelException {
-		// TODO Auto-generated method stub
-		
+		attacker.attack(defender);	
 	}
 
 	@Override
 	public boolean isAttacking(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
-		return false;
+		return unit.isAttacking();
 	}
 
 	@Override
@@ -183,14 +174,13 @@ public class Facade implements IFacade {
 
 	@Override
 	public void setDefaultBehaviorEnabled(Unit unit, boolean value) throws ModelException {
-		// TODO Auto-generated method stub
-		
+		unit.setDefaultBehavior(value);
+		System.out.println(value);
 	}
 
 	@Override
 	public boolean isDefaultBehaviorEnabled(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
-		return false;
+		return unit.getDefaultBehavior();
 	}
 	 
 }
