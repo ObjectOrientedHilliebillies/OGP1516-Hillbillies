@@ -995,6 +995,7 @@ public boolean isSprinting() {
  * 		| if (activeActivity != "move")
 				then this.speed = 0; 
 		| else
+				//TODO
 				
  */
 public void setSpeed(double[] targetPosition) {
@@ -1014,6 +1015,20 @@ public void setSpeed(double[] targetPosition) {
 	}
 }
 
+
+/**
+ * Move this unit to an adjacent cube
+ * 
+ * @param dx
+ * @param dy
+ * @param dz
+ * 
+ * @post The unit is moved to an adjacent cube
+ * 		| //TODO
+ * 
+ * @throws IllegalArgumentException
+ * @throws ModelException
+ */
 public void moveToAdjacent(int dx, int dy, int dz)
 		throws IllegalArgumentException, ModelException{
 	double[] targetPosition = new double[3];
@@ -1031,6 +1046,9 @@ public void moveToAdjacent(int dx, int dy, int dz)
 	}
 }
 
+/**
+ * Variable registering //TODO
+ */
 private double exhaustedPoints;
 
 public void doMove(double tickTime) throws ModelException {
@@ -1075,13 +1093,18 @@ public void doMove(double tickTime) throws ModelException {
 	}
 }
 
+/**
+ * Return whether this unit is moving or not
+ */
 public boolean isMoving(){
 	if (activeActivity == "move")
 		return true;
 	return false;
 }
+/////////////////////////////////////////////////
+/////////////////* ORIENTATION */////////////////
+/////////////////////////////////////////////////
 
-/* Orientation */
 /**
  * Return the orientation of this unit.
  */
@@ -1090,6 +1113,15 @@ public double getOrientation() {
 	return this.orientation;
 }
 
+/**
+ * Turn this unit to the opponent
+ * @param opponent
+ * 		The opponent this unit is fighting with
+ * 
+ * @post this unit is turned to the opponent
+ * 		| new.orientation = Math.atan2(opponent.getPosition()[1] - this.getPosition()[1]
+									, opponent.getPosition()[0] - this.getPosition()[0]);
+ */
 public void faceOpponent(Unit opponent){
 	this.orientation = Math.atan2(opponent.getPosition()[1] - this.getPosition()[1]
 									, opponent.getPosition()[0] - this.getPosition()[0]);
@@ -1100,14 +1132,31 @@ public void faceOpponent(Unit opponent){
  */
 private double orientation;
 
+///////////////////////////////////////////////////////
+/////////////////* EXTENDED MOVEMENT */////////////////
+///////////////////////////////////////////////////////
 
-/* Extended movement */
+/**
+ * Move the unit to cube
+ * @param cube
+ * 		the target cube this unit is going to
+ * 
+ * @post cube is set as targetCube
+ * 		| new.setTargetCube(cube)
+ * @throws ModelException
+ * 		cube is not a valid cube
+ * 		| !isValidCube(cube)
+ * 		
+ */
 public void moveTo(int[] cube) throws ModelException{
+	if (!Unit.isValidCube(cube))
+		throw new ModelException();
 	this.setTargetCube(cube);
 	System.out.println("target set");
 //	if (this.isValidActivity("move"))
 //		this.activeActivity = "move";
 }
+
 
 public void doMoveTo() throws IllegalArgumentException, ModelException{
 	
@@ -1143,6 +1192,9 @@ public void doWork() {
 		this.startNextActivity();
 }
 
+/**
+ * Return whether this unit is working or not
+ */
 public boolean isWorking() {
 	if (this.activeActivity == "work")
 		return true;
@@ -1172,6 +1224,9 @@ public void doAttack(){
 	}
 }
 
+/**
+ * Return whether this unit is attacking or not
+ */
 public boolean isAttacking() {
 	if (this.activeActivity == "attack")
 		return true;
@@ -1179,6 +1234,9 @@ public boolean isAttacking() {
 		return false;
 }
 
+/**
+ * Return whether this unit is under attack or not.
+ */
 public boolean isUnderAttack() {
 	if (this.activeActivity == "defend")
 		return true;
@@ -1186,6 +1244,16 @@ public boolean isUnderAttack() {
 		return false;
 }
 
+/**
+ * Defend against unit
+ * 
+ * @param unit
+ * 		the unit who is attacking this unit
+ * @post 
+ * 		| if Math.random < dodgeChance
+ * 				
+ * 		
+ */
 public void defenseAgainst(Unit unit) {	
 	System.out.println("defend");
 	this.activeActivity = "defend";
@@ -1218,6 +1286,9 @@ public void defenseAgainst(Unit unit) {
 
 /* Resting */
 
+/**
+ * Variable registering the hitpoints this unit has recovered.
+ */
 private double recoverdPoints;
 
 /**
@@ -1242,7 +1313,7 @@ public boolean isValidActivity(String activity){
  * Set the activity of this unit to resting.
  * @post   The activity of this new unit is equal to
  *         resting.
- *       | new.isResting == True
+ *       | new.isResting() == True
  * @throws IllegalArgumentException
  *         Resting is not a valid activity for this unit.
  *       | ! isValitActivity("rest")
@@ -1258,6 +1329,7 @@ public void rest() throws IllegalArgumentException{
 		this.activeActivity = "rest";
 	}
 }
+
 
 public void doRest() {
 	double oldRecoverdPoints = recoverdPoints;
@@ -1281,6 +1353,9 @@ public void doRest() {
 	}
 }
 
+/**
+ * Return whether this unit is resting or not.
+ */
 public boolean isResting() {
 	if (this.activeActivity == "rest")
 		return true;
@@ -1289,6 +1364,10 @@ public boolean isResting() {
 }
 
 /* Default behavior */
+
+/**
+ * Variable registering whether this unit's behavior is default or not.
+ */
 private boolean defaultBehavior;
 
 public void setDefaultBehavior(boolean behavior){
@@ -1299,6 +1378,13 @@ public boolean getDefaultBehavior(){
 	return this.defaultBehavior;
 }
 
+/**
+ * Change the behavior of this unit to default
+ * 
+ * @post this unit's new activity is default.
+ * 		| //TODO
+ * @throws ModelException
+ */
 public void doDefaultBehavior() throws ModelException{
 	
 	if (activeActivity == "move" && !sprinting && Math.random()<0.05){
