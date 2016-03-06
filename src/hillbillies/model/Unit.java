@@ -2,13 +2,8 @@ package hillbillies.model;
 
 import java.util.Arrays;
 
-import javax.net.ssl.SSLException;
-
-import org.junit.experimental.max.MaxHistory;
-
 import be.kuleuven.cs.som.annotate.Basic;
 import be.kuleuven.cs.som.annotate.Raw;
-import javafx.collections.WeakListChangeListener;
 import ogp.framework.util.ModelException;
 import ogp.framework.util.Util;
 
@@ -20,7 +15,7 @@ import ogp.framework.util.Util;
 // FIXME MoveTo start niet zo gemakkelijk.
 // TODO Defence is nog niet echt getest
 // FIXME isSprinting geeft soms fout aan
-// FIXME Soms verdwijnen units plots
+// FIXME Als je naar een verre locatie verplaats kan je het nog niet onderbreken.
 
 
 /**
@@ -313,53 +308,6 @@ public static boolean isValidCube(int[] cube) {
 	}
 	return true;
 }
-
-//
-///**
-// * Set the cube of this unit to the given cube.
-// * 
-// * @param  cube
-// *         The new cube for this unit.
-// * @post   The cube of this new unit is equal to
-// *         the given cube.
-// *       | new.getPosition() == cube
-// * @throws IllegalPositionException
-// *         The given cube is not a valid position for any
-// *         unit.
-// *       | ! isValidPosition(getCube())
-// */
-//@Raw
-//public void setCube(int[] cube) 
-//		throws IllegalPositionException {
-//	if (! isValidCube(cube))
-//		throw new IllegalPositionException();
-//	this.cube = cube;
-//}
-//
-///**
-// * Set the cube of this unit to the given cube.
-// * 
-// * @param  position
-// *         The new position for this unit.
-// * @post   The cube of this new unit is cube occupied
-// *         by the given position.
-// *       | new.getPosition() == position
-// * @throws IllegalPositionException
-// *         The given position is not a valid position for any
-// *         unit.
-// *       | ! isValidPosition(getPosition())
-// */
-//@Raw
-//public void setCube(double[] position)
-//		throws IllegalPositionException{
-//	if (!isValidPosition(position))
-//		throw new IllegalPositionException();
-//	int[] cubeArray = new int[3];
-//	cubeArray[0] = (int) position[0];
-//	cubeArray[1] = (int) position[1];
-//	cubeArray[2] = (int) position[2];
-//	this.cube = cubeArray;
-//}
 
 /**
  * Return the target cube of this unit.
@@ -833,7 +781,7 @@ public void advanceTime(double tickTime) throws IllegalArgumentException, ModelE
  * @param  tickTime
  *         The tick time to check.
  * @return 
- *       | result == (0 < tickTime) && (//FIXME
+ *       | result == (0 < tickTime) && (tickTime < maxTimeLapse)
 */
 public boolean isValidTickTime(double tickTime) {
 	return ((0 < tickTime) && (Util.fuzzyGreaterThanOrEqualTo( maxTimeLapse, tickTime)));
@@ -1033,7 +981,7 @@ public void setSpeed(double[] targetPosition) {
  * @param dz
  * 		difference between adjacent cube and current cube in z direction
  * 
- * @post The unit is moved to an adjacent cube
+ * @post The new units occupation is moving to an adjacent cube
  * 		| new.getCube()[0] == this.getCube()[0] + dx + .5
  * 		| new.getCube()[1] == this.getCube()[1] + dy + .5
  * 		| new.getCube()[2] == this.getCube()[2] + dz + .5
@@ -1069,9 +1017,18 @@ public void moveToAdjacent(int dx, int dy, int dz)
 private double exhaustedPoints;
 
 /**
- * //TODO
+ * Move this unit a step to its target position.
+ * 
  * @param tickTime
+ * 		The time the tick lasts.
+ * 
+ * @post The unit has moved a step to its target position.
+ * 		| new.getPosition() == this.getPosition
+ * 								+ (this.speed * this.getTargetPosition - this.getPosition)
+ *									/ distance
  * @throws ModelException
+ * 		The new position is not a valid position
+ * 		| !isValidPosition(new.getPosition)
  */
 public void doMove(double tickTime) throws ModelException {
 	if (sprinting){
@@ -1180,9 +1137,27 @@ public void moveTo(int[] cube) throws ModelException{
 }
 
 /**
- *  //TODO
+ * Move this unit to an adjacent cube
+ * 
+ * @param dx
+ * 		difference between adjacent cube and current cube in x direction
+ * @param dy
+ * 		difference between adjacent cube and current cube in y direction
+ * @param dz
+ * 		difference between adjacent cube and current cube in z direction
+ * 
+ * @post The unit is moved to an adjacent cube
+ * 		| new.getCube()[0] == this.getCube()[0] + dx + .5
+ * 		| new.getCube()[1] == this.getCube()[1] + dy + .5
+ * 		| new.getCube()[2] == this.getCube()[2] + dz + .5
+ * 
  * @throws IllegalArgumentException
+ * 		"move" is not a valid activity for this unit 
+ * 			or targetPosition is not a valid position for this unit
+ * 		| !isValidActivity("move") || !isValidPosition(targetPosition)
  * @throws ModelException
+ * 		targetPosition is not a valid position
+ * 		| !isValidPosition(targetPosition)
  */
 public void doMoveTo() throws IllegalArgumentException, ModelException{
 	
@@ -1194,7 +1169,6 @@ public void doMoveTo() throws IllegalArgumentException, ModelException{
 			difference[i] = 1;
 		else {
 			difference[i] = -1;
-		
 		}
 	}
 	this.moveToAdjacent(difference[0], difference[1], difference[2]);
@@ -1472,7 +1446,6 @@ public void doDefaultBehavior() throws ModelException{
 				newTargetCube[i] = (int) (Math.random() * 50);
 				}
 			this.setTargetCube(newTargetCube);
-					
 		}else if (randomActivity == 1) {
 			this.work();
 		}else if (randomActivity == 2 && 
@@ -1482,6 +1455,4 @@ public void doDefaultBehavior() throws ModelException{
 			this.doDefaultBehavior();
 		}
 	}
-	
-	
 }
