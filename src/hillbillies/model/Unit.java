@@ -1250,8 +1250,10 @@ public boolean isUnderAttack() {
  * @param unit
  * 		the unit who is attacking this unit
  * @post 
- * 		| if Math.random < dodgeChance
- * 				
+ * 		| if Math.random() < dodgeChance 
+ * 				 new.getPosition = this.getPosition + random
+ * 				 this.getOrientation //TODO = unit.getOrientation
+ * 		| else if Math.random() < blockChance
  * 		
  */
 public void defenseAgainst(Unit unit) {	
