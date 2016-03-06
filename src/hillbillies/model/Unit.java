@@ -993,15 +993,22 @@ public boolean isSprinting() {
  * 			The position the unit is going to
  * @post
  * 		| if (activeActivity != "move")
-				then this.speed = 0; 
-		| else
-				//TODO
-				
+ *		|		then this.speed = 0; 
+ *		| else
+ *		|		if zDifference == -1 //TODO ik weet niet of dit mag
+ *		|			then new.getSpeed() == this.getBaseSpeed()/2
+ *		|		else if zDifference == 1
+ *		|			then new.getSpeed() == this.getBaseSpeed()*1.2
+ *		|		else 
+ *		|			then new.getSpeed() == this.getBaseSpeed()
+ *		| if this.isSprinting()
+ *		|		new.getSpeed() == this.getSpeed()*2
+ *				
  */
 public void setSpeed(double[] targetPosition) {
 	if (activeActivity != "move")
 		this.speed = 0;
-	else{ //FIXME waarom staan hier accolades?
+	else{ 
 		double zDifference = (this.getPosition()[2] - targetPosition[2]);
 		if (zDifference == -1)
 			this.speed = this.getBaseSpeed()/2;
@@ -1020,17 +1027,27 @@ public void setSpeed(double[] targetPosition) {
  * Move this unit to an adjacent cube
  * 
  * @param dx
+ * 		difference between adjacent cube and current cube in x direction
  * @param dy
+ * 		difference between adjacent cube and current cube in y direction
  * @param dz
+ * 		difference between adjacent cube and current cube in z direction
  * 
  * @post The unit is moved to an adjacent cube
- * 		| //TODO
+ * 		| new.getCube()[0] == this.getCube()[0] + dx + .5
+ * 		| new.getCube()[1] == this.getCube()[1] + dy + .5
+ * 		| new.getCube()[2] == this.getCube()[2] + dz + .5
  * 
  * @throws IllegalArgumentException
+ * 		"move" is not a valid activity for this unit 
+ * 			or targetPosition is not a valid position for this unit
+ * 		| !isValidActivity("move") || !isValidPosition(targetPosition)
  * @throws ModelException
+ * 		targetPosition is not a valid position
+ * 		| !isValidPosition(targetPosition)
  */
 public void moveToAdjacent(int dx, int dy, int dz)
-		throws IllegalArgumentException, ModelException{
+		throws IllegalArgumentException, ModelException {
 	double[] targetPosition = new double[3];
 	targetPosition[0] = this.getCube()[0] + dx + .5;
 	targetPosition[1] = this.getCube()[1] + dy + .5;
@@ -1051,6 +1068,11 @@ public void moveToAdjacent(int dx, int dy, int dz)
  */
 private double exhaustedPoints;
 
+/**
+ * //TODO
+ * @param tickTime
+ * @throws ModelException
+ */
 public void doMove(double tickTime) throws ModelException {
 	if (sprinting){
 		double oldExhaustedPoints = exhaustedPoints;
@@ -1157,7 +1179,11 @@ public void moveTo(int[] cube) throws ModelException{
 //		this.activeActivity = "move";
 }
 
-
+/**
+ *  //TODO
+ * @throws IllegalArgumentException
+ * @throws ModelException
+ */
 public void doMoveTo() throws IllegalArgumentException, ModelException{
 	
 	int[] difference = new int[3];
@@ -1176,7 +1202,22 @@ public void doMoveTo() throws IllegalArgumentException, ModelException{
 }
 
 /* Working */
-public void work(){
+
+/**
+ * Change the activity from this unit to work
+ * 
+ * @post If work is a valid activity for this unit and its previous activity 
+ * 			was not work, activeActivity is changed to "work" and endTime 
+ * 			is set to the right value.
+ * 		| if (isValidActivity("work") && activeActivity != "work")
+ * 		| 		then activeActivity = "work"
+ * 		|		new.endTime = this.getCurrentTime() + 
+ * 		|			500/(double)(this.getStrength())
+ * @throws IllegalArgumentException
+ * 		"work" is not a valid activity for this unit
+ * 		| !this.isValidActivity("work")
+ */
+public void work() throws IllegalArgumentException {
 	if (!isValidActivity("work")){
 		this.nextActivity = "work";
 		throw new IllegalArgumentException();
@@ -1187,6 +1228,9 @@ public void work(){
 	}
 }
 
+/**
+ *  //TODO
+ */
 public void doWork() {
 	if (Util.fuzzyGreaterThanOrEqualTo(this.getCurrentTime(), endTime))
 		this.startNextActivity();
@@ -1202,6 +1246,11 @@ public boolean isWorking() {
 }
 
 /* Attacking */
+
+/**
+ *  //TODO
+ * @param unit
+ */
 public void attack(Unit unit){
 	if ((unit != this) && 
 		((this.getCube() == unit.getCube()) || (this.isNeighbourCube(unit.getCube()))) && 
@@ -1218,6 +1267,9 @@ public void attack(Unit unit){
 	}
 }
 
+/**
+ *  //TODO
+ */
 public void doAttack(){
 	if (this.getCurrentTime() >= activityStartTime + 1){
 		this.startNextActivity();
@@ -1251,9 +1303,11 @@ public boolean isUnderAttack() {
  * 		the unit who is attacking this unit
  * @post 
  * 		| if Math.random() < dodgeChance 
- * 				 new.getPosition = this.getPosition + random
+ * 				 new.getPosition == this.getPosition + random
  * 				 this.getOrientation //TODO = unit.getOrientation
- * 		| else if Math.random() < blockChance
+ * 		| else if (!Math.random() < blockChance)
+ * 				 new.getHitpoints() == this.getHitpoints() - unit.getStrength()/10
+ * 				 
  * 		
  */
 public void defenseAgainst(Unit unit) {	
@@ -1282,7 +1336,7 @@ public void defenseAgainst(Unit unit) {
 		this.faceOpponent(unit);
 		unit.faceOpponent(this);
 	}
-	else if (!(Math.random() < blockChance))
+	else if (!(Math.random() < blockChance)) 
 		this.setHitpoints(this.getHitpoints() - unit.getStrength()/10);
 }
 
@@ -1332,7 +1386,9 @@ public void rest() throws IllegalArgumentException{
 	}
 }
 
-
+/**
+ *  //TODO
+ */
 public void doRest() {
 	double oldRecoverdPoints = recoverdPoints;
 	recoverdPoints = (this.getCurrentTime()-activityStartTime)*this.getToughness()/200/0.2;
@@ -1372,10 +1428,22 @@ public boolean isResting() {
  */
 private boolean defaultBehavior;
 
+/**
+ * Switch the behavior of this unit to default or not default.
+ * 
+ * @param  behavior
+ *         true if set to default, false if set to not default
+ * @post   behavior is default if true, else not default
+ *       | new.defaultBehavior = behavior
+ */
+@Raw
 public void setDefaultBehavior(boolean behavior){
 	this.defaultBehavior = behavior;
 }
 
+/**
+ * Return whether the behavior is default or not
+ */
 public boolean getDefaultBehavior(){
 	return this.defaultBehavior;
 }
