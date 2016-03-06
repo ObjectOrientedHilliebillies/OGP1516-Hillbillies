@@ -12,7 +12,8 @@ import javafx.collections.WeakListChangeListener;
 import ogp.framework.util.ModelException;
 import ogp.framework.util.Util;
 
-// FIXME Als de strength ofzo veranderd kan het zijn dat de unit zijn weight niet meer legaal is.
+// FIXME Als de strength ofzo veranderd kan het zijn dat de unit zijn weight 
+//			niet meer legaal is.
 // FIXME Er zijn bugs als je meerder units hebt
 // FIXME Als je omhoog gaat veranderd alles in Nan !?
 // FIXME Na 3 min gameTime crashed het
@@ -170,7 +171,10 @@ public Unit(String name, int[] initialPosition, int weight, int agility, int str
 	this.orientation = (Math.PI/2);
 }
 
-/* Position */
+////////////////////////////////////////////////////
+////////////////////* POSITION *////////////////////
+////////////////////////////////////////////////////
+
 /**
  * Variable registering the position of this unit.
  */
@@ -181,6 +185,9 @@ private double[] position;
  */
 private int[] targetCube;
 
+/**
+ * Variable registering the target position of this Unit.
+ */
 private double[] targetPosition;
 
 
@@ -210,6 +217,14 @@ public static boolean isValidPosition(double[] position) {
 	return true;
 }
 
+/**
+ * Check whether the given component is a valid component for any unit.
+ * 
+ * @param component
+ * 		  The component to check
+ * @return
+ * 		| result == (0 < component < 50)
+ */
 public static boolean isValidComponent(double component){
 	if ((component < 0) || (component > 50))
 		return false;
@@ -224,10 +239,10 @@ public static boolean isValidComponent(double component){
  * @post   The position of this new unit is equal to
  *         the given position.
  *       | new.getPosition() == position
- * @throws IllegalPositionException
+ * @throws ModelException
  *         The given position is not a valid position for any
  *         unit.
- *       | ! isValidPosition(getPosition())
+ *       | ! isValidPosition(this.getPosition())
  */
 @Raw
 public void setPosition(double[] position) 
@@ -237,10 +252,28 @@ public void setPosition(double[] position)
 	this.position = position;
 }
 
+/**
+ * Return the target position of this unit.
+ */
+@Basic @Raw
 public double[] getTargetPosition() {
 	return this.targetPosition;
 }
 
+/**
+ * Set the target position of this unit to the given target position.
+ * 
+ * @param  position
+ *         The new position for this unit.
+ * @post   The target position of this unit is equal to
+ *         the given target position.
+ *       | new.getTargetPosition() == targetPosition
+ * @throws ModelException
+ *         The given target position is not a valid target position for any
+ *         unit.
+ *       | ! isValidPosition(this.getPosition())
+ */
+@Raw
 public void setTargetPosition(double[] targetPosition) throws ModelException {
 	if (! isValidPosition(targetPosition))
 		throw new ModelException();
@@ -269,7 +302,7 @@ public int[] getCube() {
  * @param  Cube
  *         The Cube to check.
  * @return 
- *       | result == //FIXME
+ *       | result == 0 < //FIXME
 */
 public static boolean isValidCube(int[] cube) {
 	for (double comp : cube){
@@ -327,7 +360,7 @@ public static boolean isValidCube(int[] cube) {
 //}
 
 /**
- * Return the cube of this unit.
+ * Return the target cube of this unit.
  */
 @Basic @Raw
 public int[] getTargetCube() {
@@ -355,6 +388,14 @@ public void setTargetCube(int[] cube)
 	this.targetCube = cube;
 }
 
+/**
+ * Check whether the given cube is a neighbour cube of this cube
+ *  
+ * @param  otherCube
+ *         The Cube to check.
+ * @return 
+ *       | result == //FIXME
+*/
 private boolean isNeighbourCube(int[] otherCube){
 	for (int i = 0; i != 3; i++) {
 	    if (Math.abs(this.getCube()[i] - otherCube[i]) == 1)
@@ -362,8 +403,10 @@ private boolean isNeighbourCube(int[] otherCube){
 	}
 	return false;
 }
+////////////////////////////////////////////////
+////////////////////* NAME *////////////////////
+////////////////////////////////////////////////
 
-/* Name */
 /**
  * Return the name of this unit.
  */
@@ -413,7 +456,9 @@ public void setName(String unitName)
  */
 private String unitName;
 
-/* Attributes */
+////////////////////////////////////////////////////////
+/////////////////////* ATTRIBUTES */////////////////////
+////////////////////////////////////////////////////////
 /**
  * Return the weight of this unit.
  */
@@ -431,7 +476,6 @@ public int getWeight() {
  * @return 
  *       | result == maxWeight > weight >= (strength+agility)/2 
 */
-
 public boolean isValidWeight(int weight) {
 	return (weight >= minWeight 
 			&& weight <= maxWeight);
@@ -462,7 +506,15 @@ public void setWeight(int weight) {
  * Variable registering the weight of this unit.
  */
 private int weight;
+
+/**
+ * Variable registering the maximum weight of this unit.
+ */
 private static int maxWeight = 200;
+
+/**
+ * Variable registering the minimum weight of this unit.
+ */
 private int minWeight = (this.getStrength() + this.getAgility())/2;
 
 /**
@@ -508,6 +560,10 @@ public void setStrength(int strength) {
  * Variable registering the strength of this unit.
  */
 private int strength;
+
+/**
+ * Variable registering the maximum strength of this unit.
+ */
 private static int maxStrength = 200;
 
 /**
@@ -552,6 +608,10 @@ public void setAgility(int agility) {
  * Variable registering the agility of this unit.
  */
 private int agility;
+
+/**
+ * Variable registering the maximum agility of this unit.
+ */
 private static int maxAgility = 200;
 
 /**
@@ -596,7 +656,12 @@ public void setToughness(int toughness) {
  * Variable registering the toughness of this unit.
  */
 private int toughness;
+
+/**
+ * Variable registering the maximum toughness of this unit.
+ */
 private static int maxToughness = 200;
+
 
 /* Points */
 /**
@@ -614,7 +679,7 @@ public int getStamina() {
  * @param  stamina
  *         The stamina to check.
  * @return 
- *       | result == 0 < stamina < maxStamina
+ *       | result == 0 < stamina < this.getMaxStamina()
 */
 public boolean isValidStamina(int stamina) {
 	return (0 < stamina && stamina < this.getMaxStamina());
@@ -641,6 +706,7 @@ public void setStamina(int stamina) {
 /**
  * Return the maximal stamina of this unit.
  */
+@Basic @Raw
 public int getMaxStamina() {
 	int maxStamina = this.getWeight()*this.getToughness()/50;
 	if ((this.getWeight()*this.getToughness())%50 == 0)
@@ -696,6 +762,11 @@ public void setHitpoints(int hitpoints) {
  * Variable registering the hitpoints of this Unit.
  */
 private int hitpoints;
+
+/**
+ * Return the maximum hitpoints of a unit. 
+ */
+@Basic @Raw
 public int getMaxHitpoints() {
 	int maxHitpoint = this.getWeight()*this.getToughness()/50;
 	if ((this.getWeight()*this.getToughness())%50 == 0)
@@ -703,18 +774,27 @@ public int getMaxHitpoints() {
 	return maxHitpoint+1;
 }
 
-/* Moving */
+////////////////////////////////////////////////////
+/////////////////////* MOVING */////////////////////
+////////////////////////////////////////////////////
 
+/**
+ * Return the current speed of this unit.
+ */
+@Basic @Raw
 public double getCurrentSpeed() {
 	return 3*(this.getStrength() + this.getAgility())/(4*this.getWeight());
 }
 
 
+//////////////////////////////////////////////////
+/////////////////////* TIME */////////////////////
+//////////////////////////////////////////////////
 
-/* Time */
+// No documentation required for advanceTime
 public void advanceTime(double tickTime) throws IllegalArgumentException, ModelException {
 	if (!isValidTickTime(tickTime)){
-		System.out.println(tickTime);
+		//System.out.println(tickTime);
 		throw new IllegalArgumentException();
 	}
 	else{
@@ -723,7 +803,7 @@ public void advanceTime(double tickTime) throws IllegalArgumentException, ModelE
 	
 	if (getCurrentTime()-lastTimeRested >= 180 && this.isValidActivity("rest")){
 			this.rest();
-			System.out.println("3 min zijn om");
+			//System.out.println("3 min zijn om");
 		}
 		
 	if (this.activeActivity == null && (this.targetCube != null) && 
@@ -745,19 +825,51 @@ public void advanceTime(double tickTime) throws IllegalArgumentException, ModelE
 		doDefaultBehavior();
 }
 
+/**
+ * Check whether the given tick time is a valid tick time.
+ *  
+ * @param  tickTime
+ *         The tick time to check.
+ * @return 
+ *       | result == (0 < tickTime) && (//FIXME
+*/
 public boolean isValidTickTime(double tickTime) {
 	return ((0 < tickTime) && (Util.fuzzyGreaterThanOrEqualTo( maxTimeLapse, tickTime)));
 
 }
 
+/**
+ * Return the current time
+ */
 public double getCurrentTime() {
 	return this.currentTime;
 }
 
+/**
+ * Set the time to the given time.
+ * 
+ * @param  time
+ *         The new time.
+ * @post   The time is equal to the given time
+ *       | new.getTime() == time
+ *  //FIXME moet dit niet checken of het een valid time is en een exception throwen?
+ */
+@Raw
 public void setTime(double time) {
 	this.currentTime = time;
 }
 
+/**
+ * Start a new activity.
+ * 
+ * @post	The new activity is started.
+ * 			| if nextActivity == "null"
+ * 				activeActivity == "null"
+ * 			| else if nextActivity == "work"
+ * 				isWorking == true
+ * 			| else if nextActivity == "rest"
+ * 				isResting == true
+ */
 public void startNextActivity(){
 	if (nextActivity == null)
 		activeActivity = null;
@@ -769,22 +881,58 @@ public void startNextActivity(){
 	nextActivity = null;
 }
 
+/**
+ * Variable registering the current time
+ */
 private double currentTime;
+
+/**
+ * Variable registering the maximum time interval
+ */
 private double maxTimeLapse = 0.2;
+
+/**
+ * Variable registering the current activity
+ */
 private String activeActivity;
+
+/**
+ * Variable registering the next activity
+ */
 private String nextActivity;
+
+/**
+ * Variable registering the end time
+ */
 private double endTime;
+
+/**
+ * Variable registering the start time of the current activity
+ */
 private double activityStartTime;
+
+/**
+ * Variable registering the last time this unit rested
+ */
 private double lastTimeRested =0.2;
 
-/* Basic movement */
+////////////////////////////////////////////////////////////////
+///////////////////////* BASIC MOVEMENT *///////////////////////
+////////////////////////////////////////////////////////////////
+
 /**
  * Variable registering the base speed of this unit.
  */
 private double baseSpeed;
 
+/**
+ * Variable registering the speed of this unit
+ */
 private double speed;
 
+/**
+ * Variable registering whether this unit is sprinting or not.
+ */
 private boolean sprinting;
 
 /**
@@ -795,13 +943,20 @@ public double getBaseSpeed() {
 	return this.baseSpeed;
 }
 
+//FIXME da's een louche functienaam, kunnen we 
+//		dat niet beter in getBaseSpeed zetten?
 public void setBaseSpeed(){
 	this.baseSpeed = 3*(this.getStrength() + this.getAgility())/(double) (4*this.getWeight());
 }
 
+/**
+ * Return the speed of this unit.
+ */
+@Basic @Raw
 public double getSpeed() {
 	return this.speed;
 }
+
 
 public void startSprinting(){
 	if (this.stamina > 0 && (this.activeActivity == "move" || this.targetCube != null))
