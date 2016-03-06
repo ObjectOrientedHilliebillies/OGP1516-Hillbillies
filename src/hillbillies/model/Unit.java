@@ -2,8 +2,13 @@ package hillbillies.model;
 
 import java.util.Arrays;
 
+import javax.net.ssl.SSLException;
+
+import org.junit.experimental.max.MaxHistory;
+
 import be.kuleuven.cs.som.annotate.Basic;
 import be.kuleuven.cs.som.annotate.Raw;
+import javafx.collections.WeakListChangeListener;
 import ogp.framework.util.ModelException;
 import ogp.framework.util.Util;
 
@@ -51,9 +56,6 @@ import ogp.framework.util.Util;
  */
 
 public class Unit {
-
-
-private static final int cubesPerRib = 50;
 
 /* Unit creation */
 	/**
@@ -158,6 +160,8 @@ public Unit(String name, int[] initialPosition, int weight, int agility, int str
 		toughness = 25;
 	else
 		this.setToughness(toughness);
+	this.setDefaultBehavior(enableDefaultBehavior);
+	
 	
 	// FIXME niet finaal
 	setHitpoints(getMaxHitpoints()-5);
@@ -269,7 +273,7 @@ public int[] getCube() {
 */
 public static boolean isValidCube(int[] cube) {
 	for (double comp : cube){
-		if ((comp < 0) || (comp > cubesPerRib))
+		if ((comp < 0) || (comp > 50))
 			return false;
 	}
 	return true;
@@ -707,6 +711,8 @@ public void advanceTime(double tickTime) throws IllegalArgumentException, ModelE
 	}
 	else{
 		this.setTime(this.currentTime + tickTime);
+		
+	
 	if (getCurrentTime()-lastTimeRested >= 180 && this.isValidActivity("rest")){
 			this.rest();
 			System.out.println("3 min zijn om");
@@ -727,6 +733,8 @@ public void advanceTime(double tickTime) throws IllegalArgumentException, ModelE
 	else 
 		this.speed=0;
 	}
+	if (this.getDefaultBehavior())
+		doDefaultBehavior();
 }
 
 public boolean isValidTickTime(double tickTime) {
@@ -804,7 +812,6 @@ public void setSpeed(double[] targetPosition) {
 		this.speed = 0;
 	}
 	else{
-		System.out.println(this.isSprinting());
 		double zDifference = (this.getPosition()[2] - targetPosition[2]);
 		if (zDifference == -1)
 			this.speed = this.getBaseSpeed()/2;
@@ -1093,5 +1100,39 @@ public boolean isResting() {
 }
 
 /* Default behavior */
+private boolean defaultBehavior;
 
+public void setDefaultBehavior(boolean behavior){
+	this.defaultBehavior = behavior;
+}
+
+public boolean getDefaultBehavior(){
+	return this.defaultBehavior;
+}
+
+public void doDefaultBehavior() throws ModelException{
+	
+	if (activeActivity == "move" && !sprinting && Math.random()<0.05){
+		this.sprinting = true;
+		
+	}else if (activeActivity == null) {
+		int randomActivity = (int) (Math.random() * 3);
+		if (randomActivity == 0){
+			int[] newTargetCube = new int[3];		
+			for (int i=0; i != 3; i++){
+				newTargetCube[i] = (int) (Math.random() * 50);
+				}
+			this.setTargetCube(newTargetCube);
+					
+		}else if (randomActivity == 1) {
+			this.work();
+		}else if (randomActivity == 2 && 
+				(hitpoints != this.getMaxHitpoints() || stamina != getMaxStamina())){
+			this.rest();
+		}else 
+			this.doDefaultBehavior();
+		}
+	}
+	
+	
 }

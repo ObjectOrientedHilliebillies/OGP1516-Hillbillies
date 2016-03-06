@@ -174,14 +174,13 @@ public class Facade implements IFacade {
 
 	@Override
 	public void setDefaultBehaviorEnabled(Unit unit, boolean value) throws ModelException {
-		// TODO Auto-generated method stub
-		
+		unit.setDefaultBehavior(value);
+		System.out.println(value);
 	}
 
 	@Override
 	public boolean isDefaultBehaviorEnabled(Unit unit) throws ModelException {
-		// TODO Auto-generated method stub
-		return false;
+		return unit.getDefaultBehavior();
 	}
 	 
 }
