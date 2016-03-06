@@ -1229,7 +1229,11 @@ public void work() throws IllegalArgumentException {
 }
 
 /**
- *  //TODO
+ *  Start the next activity
+ *  
+ *  @post If endTime is not passed yet, a next activity will begin
+ *  		| if (Util.fuzzyGreaterThanOrEqualTo(this.getCurrentTime(), endTime))
+					this.startNextActivity();
  */
 public void doWork() {
 	if (Util.fuzzyGreaterThanOrEqualTo(this.getCurrentTime(), endTime))
