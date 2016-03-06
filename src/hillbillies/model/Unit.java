@@ -1,6 +1,10 @@
 package hillbillies.model;
 
 
+
+
+import java.util.Random;
+
 // unit has a position, occupied block (defensive), 
 //			  name (defensive), 
 //			  weight, strength, agility, toughness (total)
@@ -9,8 +13,7 @@ package hillbillies.model;
 //			  interaction with game world (defensive)
 
 // COMMENTS
-//		Ik denk dat we omslachtig zijn geweest door altijd setVariable te gebruiken
-//		in plaats van gewoon this.variable = variable. 
+// 	TODO Ik denk dat we omslachtig zijn geweest door altijd setVariable te gebruiken in plaats van gewoon this.variable = variable. 
 
 import be.kuleuven.cs.som.annotate.Basic;
 import be.kuleuven.cs.som.annotate.Immutable;
@@ -160,6 +163,7 @@ public int getWeight() {
  * @return 
  *       | result == maxWeight > weight >= (strength+agility)/2 
 */
+
 public boolean isValidWeight(int weight) {
 	return (weight >=(this.getStrength() + this.getAgility())/2 
 			&& weight <= maxWeight);
@@ -422,7 +426,9 @@ public void setStamina(int stamina) {
  * Variable registering the stamina of this unit.
  */
 private int stamina;
-private int maxStamina = this.getWeight()*this.getToughness()/50;
+public int getMaxStamina() {
+	return this.getWeight()*this.getToughness()/50;
+}
 
 /**
  * Return the hitpoints of this Unit.
@@ -439,10 +445,10 @@ public int getHitpoints() {
  * @param  hitpoints
  *         The hitpoints to check.
  * @return 
- *       | result == 0 < hitpoints <= maxHitpoints
+ *       | result == 0 < hitpoints <= getMaxHitpoints()
 */
 public boolean isValidHitpoints(int hitpoints) {
-	return ((0 < hitpoints) && (hitpoints <= maxHitpoints));
+	return ((0 < hitpoints) && (hitpoints <= this.getMaxHitpoints()));
 }
 
 /**
@@ -467,7 +473,9 @@ public void setHitpoints(int hitpoints) {
  * Variable registering the hitpoints of this Unit.
  */
 private int hitpoints;
-private int maxHitpoints = this.getWeight()*this.getToughness()/50;
+public int getMaxHitpoints() {
+	return this.getWeight()*this.getToughness()/50;
+}
 
 
 public void advanceTime(double timeLapse) throws IllegalArgumentException {
@@ -475,6 +483,11 @@ public void advanceTime(double timeLapse) throws IllegalArgumentException {
 		throw new IllegalArgumentException();
 	else
 		this.setTime(this.currentTime + timeLapse);
+		if (isSprinting())
+		else if (isMoving())
+		else if (isWorking())
+		else if (isAttacking())
+		else if (isResting())
 }
 
 public boolean isValidTimeLapse(double timeLapse) {
@@ -492,35 +505,263 @@ public void setTime(double time) {
 private double currentTime;
 private double maxTimeLapse;
 
+public void work() {
+	if (!this.isWorking())
+		startTime = (float)this.getCurrentTime();
+	this.activityStatus = "work";
+	float endTime = startTime + (float)500/this.getStrength();
+	if ((float)this.getCurrentTime() >= endTime)
+		this.activityStatus = "default";
+	else
+		work();
+}
+
+public boolean isWorking() {
+	if (this.activityStatus == "work")
+		return true;
+	else
+		return false;
+}
+
+public void attack(Unit unit) {
+	if ((this.getCube() == unit.getCube()) 
+			|| (this.getCube().isNeighbourBlock(unit.getCube())))
+		if (!this.isAttacking())
+			startTime = (float)this.getCurrentTime();
+		this.activityStatus = "attack";
+		if ((float)this.getCurrentTime() >= startTime + 1)
+			this.activityStatus = "default";
+		else 
+			unit.defenseAgainst(this);
+			unit.activityStatus = "defend";
+}
+
+public boolean isAttacking() {
+	if (this.activityStatus == "attack")
+		return true;
+	else
+		return false;
+}
+
+public boolean isUnderAttack() {
+	if (this.activityStatus == "defend")
+		return true;
+	else
+		return false;
+}
+
+public void rest() {
+	this.activityStatus = "rest";
+	if (!this.isResting())
+		startTime = (float)this.getCurrentTime();
+	if (this.getCurrentTime() >= startTime + 0.2)
+		this.activityStatus = "default";
+		if (this.getHitpoints() < this.getMaxHitpoints() && (!this.isUnderAttack()) )
+			this.setHitpoints(this.getHitpoints() + this.getToughness()/200);
+		else if (this.getStamina() < this.getMaxStamina() && (!this.isUnderAttack()))
+			this.setStamina(this.getStamina() + this.getToughness()/100);
+	else
+		rest();
+	
+}
+
+public boolean isResting() {
+	if (this.activityStatus == "rest")
+		return true;
+	else
+		return false;
+}
+
+public String activityStatus;
+public float startTime;
+
+public void defenseAgainst(Unit unit) {	
+	this.activityStatus = "defend";
+	// First step: try to dodge
+	double dodgeChance = 0.2*unit.getAgility()/this.getAgility();
+	double blockChance = 0.25*(unit.getStrength() + unit.getAgility())/
+			(this.getAgility() + this.getStrength());
+	if (Math.random() <= dodgeChance)
+		double xCoord = Vector.getXCoord(); // iets vinden om dat random te maken
+	else if (Math.random() <= blockChance)
+		// er gebeurt niets
+		this.defenseAgainst(unit);
+	else
+		this.setHitpoints(this.getHitpoints() - unit.getStrength()/10);
+		
+		
+}
+
 // 	NOG NIET MET TEMPLATES
 
-
-///**
-// * 
-// * @return unit's position
-// */
-//@Basic @Immutable
-//public double[] getPosition() {
-//	return this.position;
-//}
-//
-///**
-// * 
-// * @return block occupied by unit
-// */
-//@Basic @Immutable
-//public int[] getOccupiedBlock() {
-//	return this.occupiedBlock;
-//}
+// TODO Dit op de juiste plek zetten
+/** TO BE ADDED TO CLASS HEADING
+ * @invar  The position of each unit must be a valid position for any
+ *         unit.
+ *       | isValidPosition(getPosition())
+ */
 
 
+/**
+ * Initialize this new unit with given position.
+ *
+ * @param  position
+ *         The position for this new unit.
+ * @effect The position of this new unit is set to
+ *         the given position.
+ *       | this.setPosition(position)
+ */
+public Unit(Vector position)
+		throws IllegalPositionException {
+	this.setPosition(position);
+}
 
 
+/**
+ * Return the position of this unit.
+ */
+@Basic @Raw
+public Vector getPosition() {
+	return this.position;
+}
+
+/**
+ * Check whether the given position is a valid position for
+ * any unit.
+ *  
+ * @param  position
+ *         The position to check.
+ * @return 
+ *       | result == 
+ *       // TODO Deze check aanvullen.
+*/
+public static boolean isValidPosition(Vector position) {
+	return position.inBorders();
+	// TODO Een test maken om dit uit te testen
+}
+
+/**
+ * Set the position of this unit to the given position.
+ * 
+ * @param  position
+ *         The new position for this unit.
+ * @post   The position of this new unit is equal to
+ *         the given position.
+ *       | new.getPosition() == position
+ * @throws IllegalPositionException
+ *         The given position is not a valid position for any
+ *         unit.
+ *       | ! isValidPosition(getPosition())
+ */
+@Raw
+public void setPosition(Vector position) 
+		throws IllegalPositionException {
+	if (! isValidPosition(position))
+		throw new IllegalPositionException();
+	this.position = position;
+}
+
+/**
+ * Variable registering the position of this unit.
+ */
+private Vector position;
 
 
-//public void rest() {
-//	if (this.hitpoints != this.getMaxHitpoints() && (!this.isUnderAttack()) )
-//		this.hitpoints = this.hitpoints + this.toughness/200;
-//	else if (this.stamina != this.getMaxStamina() && (!this.isUnderAttack()))
-//		this.stamina = this.stamina + this.toughness/100;
+/**
+ * Return the Cube of this Unit.
+ */
+@Basic @Raw
+public Cube getCube() {
+	return this.getPosition().getCube();
+}
+
+/**
+ * Check whether the given Cube is a valid Cube for
+ * any Unit.
+ *  
+ * @param  Cube
+ *         The Cube to check.
+ * @return 
+ *       | result == //TODO
+*/
+public static boolean isValidCube(Cube Cube) {
+	return false;
+}
+
+/**
+ * Variable registering the cube of this Unit.
+ */
+private Cube cube;
+
+// TODO Dit moet weer vanboven komen.
+/**
+ * @invar  The orientation of each unit must be a valid orientation for any
+ *         unit.
+ *       | isValidOrientation(getOrientation())
+ */
+
+/**
+ * Initialize this new unit with given orientation.
+ * 
+ * @param  orientation
+ *         The orientation for this new unit.
+ * @post   If the given orientation is a valid orientation for any unit,
+ *         the orientation of this new unit is equal to the given
+ *         orientation. Otherwise, the orientation of this new unit is equal
+ *         to PI/2.
+ *       | if (isValidOrientation(orientation))
+ *       |   then new.getOrientation() == orientation
+ *       |   else new.getOrientation() == PI/2
+ */
+public Unit(float orientation) {
+	if (! isValidOrientation(orientation))
+		orientation = (float) (Math.PI/2);
+	setOrientation(orientation);
+}
+
+/**
+ * Return the orientation of this unit.
+ */
+@Basic @Raw
+public Float getOrientation() {
+	return this.orientation;
+}
+
+/**
+ * Check whether the given orientation is a valid orientation for
+ * any unit.
+ *  
+ * @param  orientation
+ *         The orientation to check.
+ * @return 
+ *       | result == 
+ *       // TODO Ik weet weer niet wat hier moet.
+*/
+public static boolean isValidOrientation(Float orientation) {
+	return false;
+}
+
+/**
+ * Set the orientation of this unit to the given orientation.
+ * 
+ * @param  orientation
+ *         The new orientation for this unit.
+ * @post   If the given orientation is a valid orientation for any unit,
+ *         the orientation of this new unit is equal to the given
+ *         orientation.
+ *       | if (isValidOrientation(orientation))
+ *       |   then new.getOrientation() == orientation
+ */
+@Raw
+public void setOrientation(float orientation) {
+	if (isValidOrientation(orientation))
+		this.orientation = orientation;
+}
+
+/**
+ * Variable registering the orientation of this unit.
+ */
+private float orientation;
+
+
 }
