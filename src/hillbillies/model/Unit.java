@@ -746,11 +746,8 @@ public void advanceTime(double tickTime) throws IllegalArgumentException, ModelE
 }
 
 public boolean isValidTickTime(double tickTime) {
-<<<<<<< HEAD
-	return ((0 < tickTime) && (tickTime <= maxTimeLapse));
-=======
 	return ((0 < tickTime) && (Util.fuzzyGreaterThanOrEqualTo( maxTimeLapse, tickTime)));
->>>>>>> refs/remotes/origin/Victor
+
 }
 
 public double getCurrentTime() {
