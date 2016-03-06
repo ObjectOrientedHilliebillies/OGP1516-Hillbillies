@@ -19,6 +19,8 @@ import ogp.framework.util.Util;
 // FIXME Na 3 min gameTime crashed het
 // FIXME MoveTo start niet zo gemakkelijk.
 // TODO Defence is nog niet echt getest
+// FIXME isSprinting geeft soms fout aan
+// FIXME Soms verdwijnen units plots
 
 
 /**
@@ -957,25 +959,48 @@ public double getSpeed() {
 	return this.speed;
 }
 
-
+/**
+ * Initiates a sprint from this unit.
+ * 
+ * @post 
+ * 		| if (this.stamina > 0 && (this.activeActivity == "move" 
+ * 								|| this.targetCube != null))
+ * 		| 		then this.isSprinting() == true
+ */
 public void startSprinting(){
 	if (this.stamina > 0 && (this.activeActivity == "move" || this.targetCube != null))
 			this.sprinting = true;
 }
 
+/**
+ * End the sprint of this unit
+ */
 public void stopSprinting(){
 	this.sprinting = false;
 }
 
+/**
+ * Return whether this unit is sprinting or not.
+ */
 public boolean isSprinting() {
 		return this.sprinting;
 }
 
+/**
+ * Set the speed of this unit.
+ * 
+ * @param targetPosition
+ * 			The position the unit is going to
+ * @post
+ * 		| if (activeActivity != "move")
+				then this.speed = 0; 
+		| else
+				
+ */
 public void setSpeed(double[] targetPosition) {
-	if (activeActivity != "move"){
+	if (activeActivity != "move")
 		this.speed = 0;
-	}
-	else{
+	else{ //FIXME waarom staan hier accolades?
 		double zDifference = (this.getPosition()[2] - targetPosition[2]);
 		if (zDifference == -1)
 			this.speed = this.getBaseSpeed()/2;
