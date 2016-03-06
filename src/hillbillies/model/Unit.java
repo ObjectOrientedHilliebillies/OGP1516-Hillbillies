@@ -1252,8 +1252,22 @@ public boolean isWorking() {
 /* Attacking */
 
 /**
- *  //TODO
+ * Initiate an attack against unit
+ * 
  * @param unit
+ * 		The opponent for the attack
+ * @post If this unit is close enough to the opponent and if this unit is not 
+ * 			attacking, activeActivity will be changed in "attack". Both the
+ * 			units will face each other and the opponent will defend itself.
+ * 		| if ((unit != this) && ((this.getCube() == unit.getCube()) 
+ * 		|			|| (this.isNeighbourCube(unit.getCube()))) && 
+ *		|				(!this.isAttacking()))
+ *		| 		then new.activityStartTime = this.getCurrentTime();
+ *						new.activeActivity = "attack";
+ *						this.faceOpponent(unit);
+ *						unit.faceOpponent(this);
+ *						unit.defenseAgainst(this);
+ *						
  */
 public void attack(Unit unit){
 	if ((unit != this) && 
@@ -1272,7 +1286,12 @@ public void attack(Unit unit){
 }
 
 /**
- *  //TODO
+ *  Execute the attack
+ *  
+ *  @post if the current time is greater than the ending time, the next
+ *  		activity will be started
+ *  		| if (this.getCurrentTime() >= activityStartTime + 1){
+					this.startNextActivity()
  */
 public void doAttack(){
 	if (this.getCurrentTime() >= activityStartTime + 1){
@@ -1308,7 +1327,7 @@ public boolean isUnderAttack() {
  * @post 
  * 		| if Math.random() < dodgeChance 
  * 				 new.getPosition == this.getPosition + random
- * 				 this.getOrientation //TODO = unit.getOrientation
+ * 				 this.getOrientation = unit.getOrientation
  * 		| else if (!Math.random() < blockChance)
  * 				 new.getHitpoints() == this.getHitpoints() - unit.getStrength()/10
  * 				 
@@ -1391,7 +1410,18 @@ public void rest() throws IllegalArgumentException{
 }
 
 /**
- *  //TODO
+ * Let this unit rest
+ * 
+ * @post 
+ * 		| if (this.hitpoints != this.getMaxHitpoints())
+ * 		|		then new.hitpoints == this.hitpoints + (this.getCurrentTime()
+ * 		|				-activityStartTime)*this.getToughness()/200/0.2
+ * 		| else if (this.stamina != this.getMaxStamina())
+ * 		|		then new.stamina == this.stamina + (this.getCurrentTime()
+ * 						-activityStartTime)*this.getToughness()/100/0.2
+ * 		| else if (this.hitpoints == this.getMaxHitpoints() && this.stamina
+ * 		|				== this.getMaxStamina()
+ * 		| 		then this.startNextActivity()
  */
 public void doRest() {
 	double oldRecoverdPoints = recoverdPoints;
@@ -1455,9 +1485,11 @@ public boolean getDefaultBehavior(){
 /**
  * Change the behavior of this unit to default
  * 
- * @post this unit's new activity is default.
- * 		| //TODO
+ * @post this unit's new activity is a random activity.
+ * 		| new.activeActivity = random
  * @throws ModelException
+ * 		if newTargetCube is not a valid cube
+ * 		| (!isValidCube(targetCube))
  */
 public void doDefaultBehavior() throws ModelException{
 	
